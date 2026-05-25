@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Lakeside Cookie Co — Inventory</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #FAF7F2;
+  --warm-white: #FFFDF9;
+  --brown-dark: #2C1A0E;
+  --brown-mid: #6B3F1F;
+  --brown-light: #C4926A;
+  --brown-pale: #EDD9C5;
+  --teal: #2A7C6F;
+  --teal-light: #D4EEEA;
+  --teal-pale: #EDF7F5;
+  --amber: #D4860A;
+  --amber-light: #FDF0D5;
+  --red: #B83232;
+  --red-light: #FDEAEA;
+  --green: #2E7D4F;
+  --green-light: #E4F4EB;
+  --border: #E8DDD3;
+  --text-primary: #2C1A0E;
+  --text-secondary: #7A5C46;
+  --text-muted: #B09585;
+  --shadow-sm: 0 1px 3px rgba(44,26,14,0.08);
+  --shadow-md: 0 4px 12px rgba(44,26,14,0.10);
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; background: var(--cream); font-family: 'DM Sans', sans-serif; color: var(--text-primary); }
+
+/* SCREENS */
+.screen { display: none; min-height: 100vh; flex-direction: column; }
+.screen.active { display: flex; }
+
+/* LOGIN */
+#login-screen { align-items: center; justify-content: center; padding: 2rem; background: var(--cream); }
+.login-card { background: var(--warm-white); border: 1px solid var(--border); border-radius: 20px; padding: 2.5rem 2rem; width: 100%; max-width: 360px; box-shadow: var(--shadow-md); }
+.login-logo { text-align: center; margin-bottom: 2rem; }
+.login-logo-icon { width: 64px; height: 64px; background: var(--brown-dark); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: .75rem; }
+.login-logo-icon svg { width: 36px; height: 36px; fill: var(--cream); }
+.login-title { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--brown-dark); line-height: 1.2; }
+.login-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+.field-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px; letter-spacing: .03em; }
+.field-group { margin-bottom: 1rem; }
+select, input[type=text], input[type=password] { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; font-family: 'DM Sans', sans-serif; background: var(--warm-white); color: var(--text-primary); outline: none; appearance: none; }
+select:focus, input:focus { border-color: var(--brown-light); box-shadow: 0 0 0 3px rgba(196,146,106,.15); }
+.btn { display: block; width: 100%; padding: 12px; border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: opacity .15s, transform .1s; }
+.btn:active { transform: scale(.98); }
+.btn-primary { background: var(--brown-dark); color: var(--cream); }
+.btn-primary:hover { opacity: .88; }
+.btn-teal { background: var(--teal); color: #fff; }
+.btn-teal:hover { opacity: .88; }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-primary); }
+.btn-outline:hover { background: var(--brown-pale); }
+.btn-danger { background: var(--red); color: #fff; }
+.btn-sm { padding: 6px 12px; font-size: 12px; width: auto; border-radius: 6px; }
+.error-msg { color: var(--red); font-size: 12px; margin-top: 8px; text-align: center; display: none; }
+
+/* APP LAYOUT */
+#app-screen { background: var(--cream); }
+.topbar { background: var(--warm-white); border-bottom: 1px solid var(--border); padding: 0 1rem; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.topbar-left { display: flex; align-items: center; gap: 10px; }
+.topbar-logo { font-family: 'DM Serif Display', serif; font-size: 17px; color: var(--brown-dark); line-height: 1; }
+.topbar-logo span { color: var(--brown-light); }
+.topbar-loc { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+.role-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 20px; letter-spacing: .03em; }
+.role-owner { background: var(--brown-pale); color: var(--brown-mid); }
+.role-baker { background: var(--teal-light); color: var(--teal); }
+.role-cashier { background: var(--amber-light); color: var(--amber); }
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+.icon-btn { width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary); font-size: 18px; }
+.icon-btn:hover { background: var(--brown-pale); }
+
+/* BOTTOM NAV */
+.bottom-nav { background: var(--warm-white); border-top: 1px solid var(--border); display: flex; padding: 8px 0 max(8px, env(safe-area-inset-bottom)); position: sticky; bottom: 0; z-index: 100; }
+.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 4px 0; cursor: pointer; color: var(--text-muted); transition: color .15s; border: none; background: transparent; font-family: 'DM Sans', sans-serif; }
+.nav-item.active { color: var(--brown-dark); }
+.nav-item svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.nav-item.active svg { stroke-width: 2.2; }
+.nav-label { font-size: 10px; font-weight: 500; }
+.nav-dot { width: 5px; height: 5px; background: var(--red); border-radius: 50%; position: absolute; top: 6px; right: calc(50% - 14px); }
+
+/* CONTENT */
+.content { flex: 1; overflow-y: auto; padding: 1rem; padding-bottom: 1.5rem; }
+.page { display: none; }
+.page.active { display: block; }
+
+/* CARDS */
+.card { background: var(--warm-white); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 12px; box-shadow: var(--shadow-sm); }
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.card-title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.section-label { font-size: 11px; font-weight: 600; color: var(--text-muted); letter-spacing: .06em; text-transform: uppercase; margin: 1.25rem 0 8px; }
+
+/* ROWS */
+.list-row { display: flex; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); gap: 10px; }
+.list-row:last-child { border-bottom: none; padding-bottom: 0; }
+.row-name { font-size: 13px; color: var(--text-primary); font-weight: 500; flex: 1; }
+.row-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+/* BADGES */
+.badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 20px; white-space: nowrap; }
+.badge-red { background: var(--red-light); color: var(--red); }
+.badge-amber { background: var(--amber-light); color: var(--amber); }
+.badge-green { background: var(--green-light); color: var(--green); }
+.badge-teal { background: var(--teal-light); color: var(--teal); }
+.badge-gray { background: var(--brown-pale); color: var(--brown-mid); }
+
+/* STAT GRID */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.stat-card { background: var(--warm-white); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .85rem 1rem; box-shadow: var(--shadow-sm); }
+.stat-label { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-bottom: 4px; }
+.stat-val { font-size: 26px; font-weight: 600; color: var(--text-primary); line-height: 1; }
+.stat-val.warn { color: var(--amber); }
+.stat-val.danger { color: var(--red); }
+
+/* ALERTS */
+.alert { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: var(--radius-sm); margin-bottom: 8px; font-size: 13px; line-height: 1.4; }
+.alert svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
+.alert-red { background: var(--red-light); color: var(--red); border: 1px solid rgba(184,50,50,.2); }
+.alert-amber { background: var(--amber-light); color: var(--amber); border: 1px solid rgba(212,134,10,.2); }
+.alert-teal { background: var(--teal-pale); color: var(--teal); border: 1px solid rgba(42,124,111,.2); }
+
+/* PROGRESS */
+.progress-bar { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; margin-top: 5px; }
+.progress-fill { height: 100%; border-radius: 3px; transition: width .3s; }
+
+/* QTY CONTROLS */
+.qty-ctrl { display: flex; align-items: center; gap: 6px; }
+.qty-btn { width: 28px; height: 28px; border: 1px solid var(--border); border-radius: 6px; background: var(--warm-white); color: var(--text-primary); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 500; transition: background .1s; }
+.qty-btn:hover { background: var(--brown-pale); }
+.qty-num { min-width: 32px; text-align: center; font-size: 14px; font-weight: 600; color: var(--text-primary); }
+
+/* SEARCH */
+.search-bar { position: relative; margin-bottom: 12px; }
+.search-bar input { padding-left: 36px; background: var(--warm-white); }
+.search-bar svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; stroke: var(--text-muted); fill: none; stroke-width: 2; stroke-linecap: round; }
+
+/* FILTER PILLS */
+.filter-pills { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; margin-bottom: 12px; scrollbar-width: none; }
+.filter-pills::-webkit-scrollbar { display: none; }
+.filter-pill { padding: 5px 12px; border: 1px solid var(--border); border-radius: 20px; font-size: 12px; font-weight: 500; white-space: nowrap; cursor: pointer; background: var(--warm-white); color: var(--text-secondary); transition: all .15s; }
+.filter-pill.active { background: var(--brown-dark); color: var(--cream); border-color: var(--brown-dark); }
+
+/* MODAL */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(44,26,14,.5); z-index: 200; align-items: flex-end; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--warm-white); border-radius: 20px 20px 0 0; padding: 1.5rem 1.25rem; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
+.modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 1.25rem; }
+.modal-title { font-family: 'DM Serif Display', serif; font-size: 20px; margin-bottom: 1.25rem; color: var(--brown-dark); }
+.modal-actions { display: flex; gap: 8px; margin-top: 1rem; }
+.modal-actions .btn { flex: 1; }
+
+/* TTS */
+.tts-bar { background: var(--teal-light); border: 1px solid rgba(42,124,111,.3); border-radius: var(--radius-sm); padding: 10px 12px; display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.tts-bar span { font-size: 12px; color: var(--teal); flex: 1; }
+
+/* TRANSFER REQUEST BADGE */
+.nav-badge { background: var(--red); color: #fff; border-radius: 10px; font-size: 10px; font-weight: 700; padding: 1px 5px; position: absolute; top: 4px; right: calc(50% - 18px); }
+
+/* NEED INDICATOR */
+.need-chip { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 8px; white-space: nowrap; }
+.need-high { background: var(--red-light); color: var(--red); }
+.need-med { background: var(--amber-light); color: var(--amber); }
+.need-ok { background: var(--green-light); color: var(--green); }
+.need-frozen { background: var(--teal-light); color: var(--teal); }
+
+/* TOGGLE */
+.toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
+.toggle { position: relative; width: 42px; height: 24px; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; inset: 0; background: var(--border); border-radius: 24px; cursor: pointer; transition: .2s; }
+.toggle-slider:before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: .2s; }
+input:checked + .toggle-slider { background: var(--teal); }
+input:checked + .toggle-slider:before { transform: translateX(18px); }
+
+/* SUPPLIER TAG */
+.supplier-tag { font-size: 11px; padding: 2px 7px; border-radius: 4px; background: var(--brown-pale); color: var(--brown-mid); font-weight: 500; }
+
+/* EMPTY STATE */
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
+.empty-state svg { width: 48px; height: 48px; stroke: var(--border); fill: none; stroke-width: 1.5; margin-bottom: 1rem; }
+.empty-state p { font-size: 14px; }
+
+/* LOCATION SELECTOR */
+.loc-selector { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 12px; padding-bottom: 2px; scrollbar-width: none; }
+.loc-selector::-webkit-scrollbar { display: none; }
+.loc-pill { padding: 5px 14px; border: 1px solid var(--border); border-radius: 20px; font-size: 12px; font-weight: 500; white-space: nowrap; cursor: pointer; background: var(--warm-white); color: var(--text-secondary); transition: all .15s; }
+.loc-pill.active { background: var(--brown-dark); color: var(--cream); border-color: var(--brown-dark); }
+
+/* LOADING */
+#loading-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; flex-direction: column; gap: 1rem; }
+#loading-screen .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--brown-dark); border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.divider { height: 1px; background: var(--border); margin: 12px 0; }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading-screen">
+  <div style="font-family:'DM Serif Display',serif;font-size:22px;color:var(--brown-dark)">Lakeside Cookie Co</div>
+  <div class="spinner"></div>
+  <div style="font-size:13px;color:var(--text-muted)">Connecting...</div>
+</div>
+
+<!-- LOGIN -->
+<div id="login-screen" class="screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">
+        <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="14"/><circle cx="13" cy="15" r="2" fill="var(--brown-dark)"/><circle cx="22" cy="13" r="1.5" fill="var(--brown-dark)"/><circle cx="20" cy="21" r="1.5" fill="var(--brown-dark)"/><circle cx="14" cy="22" r="1" fill="var(--brown-dark)"/></svg>
+      </div>
+      <div class="login-title">Lakeside Cookie Co</div>
+      <div class="login-sub">Inventory Management</div>
+    </div>
+    <div class="field-group">
+      <div class="field-label">YOUR LOCATION</div>
+      <select id="login-location"></select>
+    </div>
+    <div class="field-group">
+      <div class="field-label">YOUR ROLE</div>
+      <select id="login-role">
+        <option value="owner">Owner</option>
+        <option value="baker">Baker</option>
+        <option value="cashier">Cashier</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <div class="field-label">PIN</div>
+      <input type="password" id="login-pin" placeholder="Enter PIN" maxlength="6" inputmode="numeric">
+    </div>
+    <div class="error-msg" id="login-error">Incorrect PIN. Try again.</div>
+    <button class="btn btn-primary" onclick="doLogin()" style="margin-top:.5rem">Sign in</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app-screen" class="screen">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div>
+        <div class="topbar-logo">Lakeside <span>Cookie Co</span></div>
+        <div class="topbar-loc" id="topbar-loc-name">—</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <span class="role-badge" id="topbar-role-badge"></span>
+      <button class="icon-btn" onclick="doLogout()" title="Sign out">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- OVERVIEW PAGE -->
+    <div class="page active" id="page-overview">
+      <div id="alerts-container"></div>
+      <div class="stat-grid" id="stat-grid"></div>
+      <div class="section-label">What we need</div>
+      <div class="card">
+        <div id="needs-list"></div>
+      </div>
+      <div class="section-label" id="lbl-loc-stock" style="display:none">Stock by location</div>
+      <div id="loc-stock-cards"></div>
+    </div>
+
+    <!-- ITEMS PAGE -->
+    <div class="page" id="page-items">
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="items-search" placeholder="Search items..." oninput="renderItems()">
+      </div>
+      <div class="filter-pills" id="items-filter-pills"></div>
+      <div id="items-tts-bar" style="display:none">
+        <div class="tts-bar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          <span id="tts-status">Tap the speaker icon on any item to hear it read aloud</span>
+          <button class="btn btn-sm btn-outline" onclick="stopTTS()">Stop</button>
+        </div>
+      </div>
+      <div class="loc-selector" id="items-loc-selector"></div>
+      <div id="items-list"></div>
+      <button class="btn btn-teal" onclick="openAddItem()" id="btn-add-item" style="margin-top:1rem">+ Add item</button>
+    </div>
+
+    <!-- INGREDIENTS PAGE -->
+    <div class="page" id="page-ingredients">
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="ing-search" placeholder="Search ingredients..." oninput="renderIngredients()">
+      </div>
+      <div class="filter-pills" id="ing-filter-pills"></div>
+      <div id="ing-list"></div>
+      <button class="btn btn-teal" onclick="openAddIngredient()" id="btn-add-ing" style="margin-top:1rem">+ Add ingredient</button>
+    </div>
+
+    <!-- TRANSFERS PAGE -->
+    <div class="page" id="page-transfers">
+      <div id="transfers-content"></div>
+    </div>
+
+    <!-- SETTINGS PAGE (owner only) -->
+    <div class="page" id="page-settings">
+      <div class="section-label">Locations</div>
+      <div class="card" id="settings-locations"></div>
+      <button class="btn btn-outline" onclick="openAddLocation()" style="margin-bottom:12px">+ Add location</button>
+      <div class="section-label">Suppliers</div>
+      <div class="card" id="settings-suppliers"></div>
+      <button class="btn btn-outline" onclick="openAddSupplier()" style="margin-bottom:12px">+ Add supplier</button>
+      <div class="section-label">PINs</div>
+      <div class="card">
+        <div class="list-row"><div class="row-name">Owner PIN</div><span class="badge badge-gray" id="pin-owner-display"></span></div>
+        <div class="list-row"><div class="row-name">Baker PIN</div><span class="badge badge-gray" id="pin-baker-display"></span></div>
+        <div class="list-row"><div class="row-name">Cashier PIN</div><span class="badge badge-gray" id="pin-cashier-display"></span></div>
+      </div>
+      <button class="btn btn-outline" onclick="openChangePins()">Change PINs</button>
+      <div style="height:2rem"></div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav" id="bottom-nav">
+    <button class="nav-item active" onclick="showPage('overview',this)" id="nav-overview">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      <span class="nav-label">Overview</span>
+    </button>
+    <button class="nav-item" onclick="showPage('items',this)" id="nav-items">
+      <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+      <span class="nav-label">Items</span>
+    </button>
+    <button class="nav-item" onclick="showPage('ingredients',this)" id="nav-ingredients">
+      <svg viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>
+      <span class="nav-label">Ingredients</span>
+    </button>
+    <button class="nav-item" onclick="showPage('transfers',this)" id="nav-transfers" style="position:relative">
+      <svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+      <span class="nav-label">Transfers</span>
+      <span class="nav-badge" id="transfer-badge" style="display:none">0</span>
+    </button>
+    <button class="nav-item" onclick="showPage('settings',this)" id="nav-settings">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span class="nav-label">Settings</span>
+    </button>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<script>
+const DB = 'https://lakeside-cookie-co-default-rtdb.firebaseio.com';
+let state = { locations:[], items:[], ingredients:[], transfers:[], suppliers:[], pins:{owner:'1234',baker:'2222',cashier:'3333'} };
+let session = { role:null, locationId:null, locationName:null };
+let selectedItemsLoc = 'all';
+let itemsFilter = 'all';
+let ingFilter = 'all';
+let ttsActive = false;
+
+// ── FIREBASE ──────────────────────────────────────────────
+async function fbGet(path) {
+  try {
+    const r = await fetch(`${DB}/${path}.json`);
+    return await r.json();
+  } catch(e) { return null; }
+}
+async function fbSet(path, data) {
+  try {
+    await fetch(`${DB}/${path}.json`, { method:'PUT', body: JSON.stringify(data) });
+  } catch(e) {}
+}
+async function fbPush(path, data) {
+  try {
+    const r = await fetch(`${DB}/${path}.json`, { method:'POST', body: JSON.stringify(data) });
+    const j = await r.json();
+    return j.name;
+  } catch(e) { return null; }
+}
+async function fbPatch(path, data) {
+  try {
+    await fetch(`${DB}/${path}.json`, { method:'PATCH', body: JSON.stringify(data) });
+  } catch(e) {}
+}
+async function fbDelete(path) {
+  try {
+    await fetch(`${DB}/${path}.json`, { method:'DELETE' });
+  } catch(e) {}
+}
+
+function objToArr(obj) {
+  if (!obj) return [];
+  return Object.entries(obj).map(([id,v]) => ({id,...v}));
+}
+
+async function loadAll() {
+  const [locs, items, ings, transfers, suppliers, pins] = await Promise.all([
+    fbGet('locations'), fbGet('items'), fbGet('ingredients'),
+    fbGet('transfers'), fbGet('suppliers'), fbGet('pins')
+  ]);
+  state.locations = objToArr(locs);
+  state.items = objToArr(items);
+  state.ingredients = objToArr(ings);
+  state.transfers = objToArr(transfers);
+  state.suppliers = objToArr(suppliers);
+  if (pins) state.pins = pins;
+
+  if (state.locations.length === 0) await seedDefaults();
+  await seedIngredientsIfEmpty();
+}
+
+async function seedDefaults() {
+  const locs = [
+    { name:'Cedarburg', type:'both' },
+    { name:'Mequon', type:'retail' }
+  ];
+  for (const l of locs) {
+    const id = await fbPush('locations', l);
+    state.locations.push({id,...l});
+  }
+  const suppliers = ['Costco','Valley','Meijer','Amazon'];
+  for (const s of suppliers) {
+    const id = await fbPush('suppliers', {name:s});
+    state.suppliers.push({id,name:s});
+  }
+  await fbSet('pins', state.pins);
+  const sampleItems = [
+    {name:'Chocolate Chip',category:'Cookie',stock:{},target:12,frozen:{},notes:''},
+    {name:'Snickerdoodle',category:'Cookie',stock:{},target:10,frozen:{},notes:''},
+    {name:'Peanut Butter',category:'Cookie',stock:{},target:8,frozen:{},notes:''},
+  ];
+  for (const it of sampleItems) {
+    const id = await fbPush('items', it);
+    state.items.push({id,...it});
+  }
+  const sampleIngs = [
+    {name:'All-purpose flour',qty:12,unit:'lbs',min:8,supplierId:state.suppliers[0]?.id||'',category:'Dry'},
+    {name:'Butter',qty:5,unit:'lbs',min:6,supplierId:state.suppliers[2]?.id||'',category:'Dairy'},
+    {name:'Sugar',qty:9,unit:'lbs',min:5,supplierId:state.suppliers[0]?.id||'',category:'Dry'},
+    {name:'Eggs',qty:3,unit:'doz',min:2,supplierId:state.suppliers[2]?.id||'',category:'Dairy'},
+    {name:'Chocolate Chips',qty:4,unit:'lbs',min:3,supplierId:state.suppliers[0]?.id||'',category:'Mix-ins'},
+  ];
+  for (const ing of sampleIngs) {
+    const id = await fbPush('ingredients', ing);
+    state.ingredients.push({id,...ing});
+  }
+}
+
+// ── INIT ──────────────────────────────────────────────────
+
+const SEED_INGREDIENTS = [
+  // COSTCO
+  { name:'Flour', category:'Dry Goods', unit:'bags', qty:0, min:2, supplier:'Costco' },
+  { name:'Sugar', category:'Dry Goods', unit:'bags', qty:0, min:1, supplier:'Costco' },
+  { name:'Powdered sugar', category:'Dry Goods', unit:'bags', qty:0, min:1, supplier:'Costco' },
+  { name:'Oats', category:'Dry Goods', unit:'bags', qty:0, min:1, supplier:'Costco' },
+  { name:'Baking soda', category:'Dry Goods', unit:'containers', qty:0, min:1, supplier:'Costco' },
+  { name:'Cinnamon', category:'Dry Goods', unit:'containers', qty:0, min:1, supplier:'Costco' },
+  { name:'Graham crackers', category:'Dry Goods', unit:'boxes', qty:0, min:1, supplier:'Costco' },
+  { name:'Animal crackers', category:'Dry Goods', unit:'bags', qty:0, min:1, supplier:'Costco' },
+  { name:'Biscoff cookies', category:'Dry Goods', unit:'bags', qty:0, min:1, supplier:'Costco' },
+  { name:'Semi sweet chocolate chips', category:'Baking', unit:'bags', qty:0, min:1, supplier:'Costco' },
+  { name:'Corn syrup', category:'Baking', unit:'bottles', qty:0, min:1, supplier:'Costco' },
+  { name:'Honey', category:'Baking', unit:'bottles', qty:0, min:1, supplier:'Costco' },
+  { name:'Pumpkin puree', category:'Baking', unit:'cans', qty:0, min:1, supplier:'Costco' },
+  { name:'Sweetened condensed milk', category:'Baking', unit:'cans', qty:0, min:2, supplier:'Costco' },
+  { name:'PB powder', category:'Baking', unit:'containers', qty:0, min:1, supplier:'Costco' },
+  { name:'Peanut butter', category:'Baking', unit:'jars', qty:0, min:1, supplier:'Costco' },
+  { name:'Pecans', category:'Nuts & Mix-ins', unit:'bags', qty:0, min:1, supplier:'Costco' },
+  { name:'Macadamia nuts', category:'Nuts & Mix-ins', unit:'bags', qty:0, min:1, supplier:'Costco' },
+  { name:'Blueberries', category:'Produce', unit:'containers', qty:0, min:1, supplier:'Costco' },
+  { name:'Lemons', category:'Produce', unit:'bags', qty:0, min:1, supplier:'Costco' },
+  { name:'Carrots', category:'Produce', unit:'bags', qty:0, min:1, supplier:'Costco' },
+  { name:'Cream cheese', category:'Dairy', unit:'packs', qty:0, min:2, supplier:'Costco' },
+  { name:'Butter', category:'Dairy', unit:'boxes', qty:0, min:2, supplier:'Costco' },
+  { name:'Eggs', category:'Dairy', unit:'flats', qty:0, min:1, supplier:'Costco' },
+  { name:'Egg whites', category:'Dairy', unit:'cartons', qty:0, min:1, supplier:'Costco' },
+  { name:'Whole milk', category:'Dairy', unit:'gallons', qty:0, min:1, supplier:'Costco' },
+  { name:'Skim milk', category:'Dairy', unit:'gallons', qty:0, min:1, supplier:'Costco' },
+  { name:'2% milk', category:'Dairy', unit:'gallons', qty:0, min:1, supplier:'Costco' },
+  { name:'Heavy cream', category:'Dairy', unit:'cartons', qty:0, min:1, supplier:'Costco' },
+  { name:'Almond milk', category:'Dairy', unit:'cartons', qty:0, min:1, supplier:'Costco' },
+  { name:'Oat milk', category:'Dairy', unit:'cartons', qty:0, min:1, supplier:'Costco' },
+  { name:'Redi whip', category:'Dairy', unit:'cans', qty:0, min:1, supplier:'Costco' },
+  { name:'Vegetable oil', category:'Oils & Liquids', unit:'bottles', qty:0, min:1, supplier:'Costco' },
+  { name:'Apple cider', category:'Oils & Liquids', unit:'jugs', qty:0, min:1, supplier:'Costco' },
+  { name:'Ice Mountain water', category:'Beverages', unit:'cases', qty:0, min:1, supplier:'Costco' },
+  { name:'Pellegrino', category:'Beverages', unit:'cases', qty:0, min:1, supplier:'Costco' },
+  { name:'Lemonade', category:'Beverages', unit:'bottles', qty:0, min:1, supplier:'Costco' },
+  { name:'Pink salt', category:'Spices', unit:'containers', qty:0, min:1, supplier:'Costco' },
+  { name:'Sea salt', category:'Spices', unit:'containers', qty:0, min:1, supplier:'Costco' },
+  { name:'Press and seal', category:'Supplies', unit:'rolls', qty:0, min:1, supplier:'Costco' },
+  { name:'Aluminum foil', category:'Supplies', unit:'rolls', qty:0, min:1, supplier:'Costco' },
+  { name:'Garbage bags', category:'Supplies', unit:'boxes', qty:0, min:1, supplier:'Costco' },
+  { name:'Lined post-it notes', category:'Office', unit:'packs', qty:0, min:1, supplier:'Costco' },
+  { name:'Envelopes', category:'Office', unit:'boxes', qty:0, min:1, supplier:'Costco' },
+  // MEIJER
+  { name:'Frosted animal crackers', category:'Dry Goods', unit:'bags', qty:0, min:1, supplier:'Meijer' },
+  { name:'Golden Oreos', category:'Dry Goods', unit:'bags', qty:0, min:1, supplier:'Meijer' },
+  { name:'Rice Krispies', category:'Dry Goods', unit:'boxes', qty:0, min:1, supplier:'Meijer' },
+  { name:'Pretzel twists', category:'Dry Goods', unit:'bags', qty:0, min:1, supplier:'Meijer' },
+  { name:'Pretzel rods', category:'Dry Goods', unit:'bags', qty:0, min:1, supplier:'Meijer' },
+  { name:'Kettle chips', category:'Dry Goods', unit:'bags', qty:0, min:1, supplier:'Meijer' },
+  { name:'Coconut flakes', category:'Baking', unit:'bags', qty:0, min:1, supplier:'Meijer' },
+  { name:'Strawberry jello', category:'Baking', unit:'boxes', qty:0, min:1, supplier:'Meijer' },
+  { name:'Mini marshmallows', category:'Baking', unit:'bags', qty:0, min:1, supplier:'Meijer' },
+  { name:'Crushed pineapple', category:'Baking', unit:'cans', qty:0, min:2, supplier:'Meijer' },
+  { name:'Chocolate cake mix', category:'Cake Mixes', unit:'boxes', qty:0, min:5, supplier:'Meijer' },
+  { name:'Red velvet cake mix', category:'Cake Mixes', unit:'boxes', qty:0, min:4, supplier:'Meijer' },
+  { name:'Vanilla cake mix', category:'Cake Mixes', unit:'boxes', qty:0, min:5, supplier:'Meijer' },
+  { name:'White cake mix', category:'Cake Mixes', unit:'boxes', qty:0, min:2, supplier:'Meijer' },
+  { name:'Yellow cake mix', category:'Cake Mixes', unit:'boxes', qty:0, min:2, supplier:'Meijer' },
+  { name:'Strawberry cake mix', category:'Cake Mixes', unit:'boxes', qty:0, min:2, supplier:'Meijer' },
+  { name:'Lemon juice', category:'Produce', unit:'bottles', qty:0, min:1, supplier:'Meijer' },
+  { name:'Blueberries (fresh)', category:'Produce', unit:'pints', qty:0, min:1, supplier:'Meijer' },
+  { name:'Sweetened condensed milk (Meijer)', category:'Baking', unit:'cans', qty:0, min:2, supplier:'Meijer' },
+  { name:'Pumpkin puree (Meijer)', category:'Baking', unit:'cans', qty:0, min:1, supplier:'Meijer' },
+  { name:'Corn syrup (Meijer)', category:'Baking', unit:'bottles', qty:0, min:1, supplier:'Meijer' },
+  { name:'Diet Dr Pepper', category:'Beverages', unit:'cases', qty:0, min:1, supplier:'Meijer' },
+  { name:'Diet Coke', category:'Beverages', unit:'cases', qty:0, min:1, supplier:'Meijer' },
+  { name:'Mountain Dew', category:'Beverages', unit:'cases', qty:0, min:1, supplier:'Meijer' },
+  { name:'Root beer', category:'Beverages', unit:'cases', qty:0, min:1, supplier:'Meijer' },
+  { name:'Cherry Coke', category:'Beverages', unit:'cases', qty:0, min:1, supplier:'Meijer' },
+  { name:'Aluminum foil (Meijer)', category:'Supplies', unit:'rolls', qty:0, min:1, supplier:'Meijer' },
+  { name:'Press and seal (Meijer)', category:'Supplies', unit:'rolls', qty:0, min:1, supplier:'Meijer' },
+  { name:'WD-40', category:'Supplies', unit:'cans', qty:0, min:1, supplier:'Meijer' },
+  { name:'Dry erase markers', category:'Office', unit:'packs', qty:0, min:1, supplier:'Meijer' },
+  // RESTAURANT DEPOT
+  { name:'32oz deli containers with lids', category:'Packaging', unit:'sleeves', qty:0, min:1, supplier:'Restaurant Depot' },
+  { name:'Thank you bags', category:'Packaging', unit:'boxes', qty:0, min:1, supplier:'Restaurant Depot' },
+  { name:'Oreo mousse torte', category:'Ready-made', unit:'each', qty:0, min:1, supplier:'Restaurant Depot' },
+  { name:'Chocolate mousse torte', category:'Ready-made', unit:'each', qty:0, min:1, supplier:'Restaurant Depot' },
+  { name:'Macarons', category:'Ready-made', unit:'boxes', qty:0, min:1, supplier:'Restaurant Depot' },
+  { name:'Flourless cake', category:'Ready-made', unit:'each', qty:0, min:1, supplier:'Restaurant Depot' },
+  { name:'Red velvet take and bake', category:'Ready-made', unit:'each', qty:0, min:1, supplier:'Restaurant Depot' },
+  { name:'Chocolate fudge cake', category:'Ready-made', unit:'each', qty:0, min:1, supplier:'Restaurant Depot' },
+  { name:'Cinnamon take and bake', category:'Ready-made', unit:'each', qty:0, min:1, supplier:'Restaurant Depot' },
+  { name:'Graham flour', category:'Dry Goods', unit:'bags', qty:0, min:1, supplier:'Restaurant Depot' },
+  { name:'Butterfinger pieces', category:'Nuts & Mix-ins', unit:'bags', qty:0, min:1, supplier:'Restaurant Depot' },
+  { name:'Vanilla extract', category:'Baking', unit:'bottles', qty:0, min:1, supplier:'Restaurant Depot' },
+  { name:'Nutella', category:'Baking', unit:'jars', qty:0, min:1, supplier:'Restaurant Depot' },
+  { name:'Crisco', category:'Baking', unit:'cans', qty:0, min:1, supplier:'Restaurant Depot' },
+  { name:'Cocoa powder', category:'Baking', unit:'containers', qty:0, min:1, supplier:'Restaurant Depot' },
+  { name:'Molasses', category:'Baking', unit:'bottles', qty:0, min:1, supplier:'Restaurant Depot' },
+  { name:'Biscoff spread', category:'Baking', unit:'jars', qty:0, min:1, supplier:'Restaurant Depot' },
+  { name:'Ghirardelli caramel squeeze bottles', category:'Baking', unit:'bottles', qty:0, min:1, supplier:'Restaurant Depot' },
+  { name:'Ghirardelli chocolate squeeze bottles', category:'Baking', unit:'bottles', qty:0, min:1, supplier:'Restaurant Depot' },
+  { name:'Butter (Restaurant Depot)', category:'Dairy', unit:'boxes', qty:0, min:1, supplier:'Restaurant Depot' },
+  { name:'Lemons (Restaurant Depot)', category:'Produce', unit:'bags', qty:0, min:1, supplier:'Restaurant Depot' },
+  { name:'Pam / baking spray', category:'Oils & Liquids', unit:'cans', qty:0, min:1, supplier:'Restaurant Depot' },
+  { name:'Large gloves (green box)', category:'Supplies', unit:'boxes', qty:0, min:1, supplier:'Restaurant Depot' },
+  { name:'Sea salt shaker', category:'Spices', unit:'each', qty:0, min:1, supplier:'Restaurant Depot' },
+  { name:'5-cutter pastry wheel', category:'Equipment', unit:'each', qty:0, min:1, supplier:'Restaurant Depot' },
+  { name:'Drink thermometers', category:'Equipment', unit:'each', qty:0, min:1, supplier:'Restaurant Depot' },
+  // GORDON'S / WEBSTAURANT
+  { name:'Butterscotch chips', category:'Nuts & Mix-ins', unit:'bags', qty:0, min:1, supplier:"Gordon's / Webstaurant" },
+  { name:'Vanilla Monin syrup', category:'Beverages', unit:'bottles', qty:0, min:1, supplier:"Gordon's / Webstaurant" },
+  { name:'Strawberry Monin syrup', category:'Beverages', unit:'bottles', qty:0, min:1, supplier:"Gordon's / Webstaurant" },
+];
+
+
+async function seedIngredientsIfEmpty() {
+  // Only seed if ingredients are empty
+  if (state.ingredients.length > 0) return;
+
+  // Build supplier map
+  const supplierMap = {};
+  state.suppliers.forEach(s => { supplierMap[s.name] = s.id; });
+
+  // Add any missing suppliers
+  const extraSuppliers = ["Restaurant Depot", "Gordon's / Webstaurant"];
+  for (const name of extraSuppliers) {
+    if (!supplierMap[name]) {
+      const id = await fbPush('suppliers', { name });
+      supplierMap[name] = id;
+      state.suppliers.push({ id, name });
+    }
+  }
+
+  // Remove Valley from suppliers since it's not in the actual list - keep as is
+
+  console.log('Seeding', SEED_INGREDIENTS.length, 'ingredients...');
+  for (const ing of SEED_INGREDIENTS) {
+    const { supplier, ...rest } = ing;
+    const supplierId = supplierMap[supplier] || '';
+    const id = await fbPush('ingredients', { ...rest, supplierId });
+    state.ingredients.push({ id, ...rest, supplierId });
+  }
+  console.log('Ingredient seed complete.');
+}
+
+window.onload = async () => {
+  await loadAll();
+  buildLoginLocationSelect();
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('login-screen').classList.add('active');
+};
+
+function buildLoginLocationSelect() {
+  const sel = document.getElementById('login-location');
+  sel.innerHTML = state.locations.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
+}
+
+// ── LOGIN ──────────────────────────────────────────────────
+function doLogin() {
+  const role = document.getElementById('login-role').value;
+  const pin = document.getElementById('login-pin').value;
+  const locId = document.getElementById('login-location').value;
+  if (pin !== state.pins[role]) {
+    document.getElementById('login-error').style.display = 'block';
+    return;
+  }
+  document.getElementById('login-error').style.display = 'none';
+  const loc = state.locations.find(l => l.id === locId);
+  session = { role, locationId: locId, locationName: loc?.name || '' };
+  document.getElementById('login-screen').classList.remove('active');
+  document.getElementById('app-screen').classList.add('active');
+  setupApp();
+}
+
+function doLogout() {
+  session = { role:null, locationId:null, locationName:null };
+  document.getElementById('login-pin').value = '';
+  document.getElementById('app-screen').classList.remove('active');
+  document.getElementById('login-screen').classList.add('active');
+  buildLoginLocationSelect();
+}
+
+function setupApp() {
+  const rb = document.getElementById('topbar-role-badge');
+  rb.textContent = session.role.charAt(0).toUpperCase() + session.role.slice(1);
+  rb.className = 'role-badge role-' + session.role;
+  document.getElementById('topbar-loc-name').textContent = session.locationName;
+
+  // Role-based nav
+  const isCashier = session.role === 'cashier';
+  document.getElementById('nav-ingredients').style.display = isCashier ? 'none' : '';
+  document.getElementById('nav-transfers').style.display = isCashier ? 'none' : '';
+  document.getElementById('nav-settings').style.display = session.role === 'owner' ? '' : 'none';
+  document.getElementById('btn-add-item').style.display = isCashier ? 'none' : '';
+  document.getElementById('btn-add-ing').style.display = isCashier ? 'none' : '';
+
+  selectedItemsLoc = session.locationId;
+  showPage('overview', document.getElementById('nav-overview'));
+  pollTransfers();
+}
+
+// ── PAGES ──────────────────────────────────────────────────
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  el.classList.add('active');
+  if (name === 'overview') renderOverview();
+  if (name === 'items') { buildItemsLocSelector(); renderItems(); }
+  if (name === 'ingredients') renderIngredients();
+  if (name === 'transfers') renderTransfers();
+  if (name === 'settings') renderSettings();
+}
+
+// ── OVERVIEW ──────────────────────────────────────────────
+function renderOverview() {
+  renderAlerts();
+  renderStats();
+  renderNeeds();
+}
+
+function getItemStock(item, locId) {
+  return (item.stock && item.stock[locId]) || 0;
+}
+function getItemFrozen(item, locId) {
+  return (item.frozen && item.frozen[locId]) || 0;
+}
+function getTotalStock(item) {
+  let t = 0;
+  state.locations.forEach(l => t += getItemStock(item, l.id) + getItemFrozen(item, l.id));
+  return t;
+}
+function getItemTarget(item) { return item.target || 0; }
+
+function renderAlerts() {
+  const c = document.getElementById('alerts-container');
+  let html = '';
+  state.items.forEach(it => {
+    const total = getTotalStock(it);
+    const target = getItemTarget(it);
+    if (total === 0 && target > 0) {
+      html += alert_html('red', `${it.name} is completely out of stock across all locations.`);
+    } else if (total < target * 0.3 && target > 0) {
+      html += alert_html('red', `${it.name} is critically low — ${total} doz available, need ${target}.`);
+    } else if (total < target * 0.6 && target > 0) {
+      html += alert_html('amber', `${it.name} is running low — ${total} of ${target} doz target.`);
+    }
+  });
+  state.ingredients.forEach(ing => {
+    if (ing.qty < ing.min) {
+      const sup = state.suppliers.find(s => s.id === ing.supplierId);
+      html += alert_html('amber', `${ing.name} below reorder level (${ing.qty} ${ing.unit})${sup ? ' — reorder from ' + sup.name : ''}.`);
+    }
+  });
+  const pending = state.transfers.filter(t => t.status === 'pending');
+  if (pending.length) html += alert_html('teal', `${pending.length} pending transfer${pending.length>1?'s':''} waiting to be fulfilled.`);
+  c.innerHTML = html;
+}
+
+function alert_html(type, msg) {
+  const icons = {
+    red: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+    amber: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+    teal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
+  };
+  return `<div class="alert alert-${type}">${icons[type]}<span>${msg}</span></div>`;
+}
+
+function renderStats() {
+  const grid = document.getElementById('stat-grid');
+  const lowItems = state.items.filter(it => getTotalStock(it) < getItemTarget(it) * 0.6 && getItemTarget(it) > 0).length;
+  const lowIngs = state.ingredients.filter(i => i.qty < i.min).length;
+  const pending = state.transfers.filter(t => t.status === 'pending').length;
+  const totalStock = state.items.reduce((a,it) => a + getTotalStock(it), 0);
+  grid.innerHTML = `
+    <div class="stat-card"><div class="stat-label">Total stock (doz)</div><div class="stat-val">${totalStock}</div></div>
+    <div class="stat-card"><div class="stat-label">Items needing stock</div><div class="stat-val ${lowItems>0?'warn':''}">${lowItems}</div></div>
+    <div class="stat-card"><div class="stat-label">Low ingredients</div><div class="stat-val ${lowIngs>0?'danger':''}">${lowIngs}</div></div>
+    <div class="stat-card"><div class="stat-label">Pending transfers</div><div class="stat-val ${pending>0?'warn':''}">${pending}</div></div>`;
+}
+
+function renderNeeds() {
+  const list = document.getElementById('needs-list');
+  if (!state.items.length) { list.innerHTML = '<div class="empty-state"><p>No items yet</p></div>'; return; }
+  let html = '';
+  const sorted = [...state.items].sort((a,b) => {
+    const aNeeded = Math.max(0, getItemTarget(a) - getTotalStock(a));
+    const bNeeded = Math.max(0, getItemTarget(b) - getTotalStock(b));
+    return bNeeded - aNeeded;
+  });
+  sorted.forEach(it => {
+    const total = getTotalStock(it);
+    const target = getItemTarget(it);
+    const needed = Math.max(0, target - total);
+    let chip = '', chipClass = '';
+    if (needed === 0) { chip = 'On target'; chipClass = 'need-ok'; }
+    else if (needed >= target * 0.7) { chip = `Need ${needed} doz`; chipClass = 'need-high'; }
+    else { chip = `Need ${needed} doz`; chipClass = 'need-med'; }
+    const frozen = state.locations.reduce((a,l) => a + getItemFrozen(it,l.id), 0);
+    html += `<div class="list-row">
+      <div style="flex:1">
+        <div class="row-name">${it.name}</div>
+        <div class="row-sub">${total} doz fresh${frozen>0?' · '+frozen+' frozen':''}${target?' · target: '+target:''}</div>
+      </div>
+      <span class="need-chip ${chipClass}">${chip}</span>
+    </div>`;
+  });
+  list.innerHTML = html;
+}
+
+// ── ITEMS ──────────────────────────────────────────────────
+function buildItemsLocSelector() {
+  const c = document.getElementById('items-loc-selector');
+  const canSeeAll = session.role !== 'cashier';
+  let html = canSeeAll ? `<div class="loc-pill ${selectedItemsLoc==='all'?'active':''}" onclick="setItemsLoc('all',this)">All locations</div>` : '';
+  state.locations.forEach(l => {
+    html += `<div class="loc-pill ${selectedItemsLoc===l.id?'active':''}" onclick="setItemsLoc('${l.id}',this)">${l.name}</div>`;
+  });
+  c.innerHTML = html;
+}
+
+function setItemsLoc(id, el) {
+  selectedItemsLoc = id;
+  document.querySelectorAll('#items-loc-selector .loc-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  renderItems();
+}
+
+function renderItems() {
+  const search = document.getElementById('items-search').value.toLowerCase();
+  const container = document.getElementById('items-list');
+  const cats = ['all', ...new Set(state.items.map(i => i.category).filter(Boolean))];
+  buildFilterPills('items-filter-pills', cats, itemsFilter, v => { itemsFilter = v; renderItems(); });
+
+  let items = state.items;
+  if (search) items = items.filter(i => i.name.toLowerCase().includes(search));
+  if (itemsFilter !== 'all') items = items.filter(i => i.category === itemsFilter);
+
+  if (!items.length) { container.innerHTML = '<div class="empty-state"><p>No items found</p></div>'; return; }
+
+  // Show TTS bar for baker/owner
+  document.getElementById('items-tts-bar').style.display = session.role !== 'cashier' ? 'block' : 'none';
+
+  let html = '';
+  items.forEach(it => {
+    const locs = selectedItemsLoc === 'all' ? state.locations : state.locations.filter(l => l.id === selectedItemsLoc);
+    locs.forEach(loc => {
+      const stock = getItemStock(it, loc.id);
+      const frozen = getItemFrozen(it, loc.id);
+      const target = getItemTarget(it);
+      const total = stock + frozen;
+      const needed = Math.max(0, target - getTotalStock(it));
+      const pct = target > 0 ? Math.min(100, Math.round(total / target * 100)) : 100;
+      const fillColor = pct >= 70 ? 'var(--green)' : pct >= 40 ? 'var(--amber)' : 'var(--red)';
+      const locLabel = state.locations.length > 1 && selectedItemsLoc === 'all' ? `<span style="font-size:10px;color:var(--text-muted);margin-left:4px">${loc.name}</span>` : '';
+
+      const canEdit = session.role !== 'cashier';
+      const ttsBtn = canEdit ? `<button class="qty-btn" onclick="speakItem('${it.name}',${needed},'${loc.name}')" title="Read aloud" style="font-size:14px">🔊</button>` : '';
+
+      html += `<div class="card" style="margin-bottom:10px">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:600;color:var(--text-primary)">${it.name}${locLabel}</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">${it.category||''}${target?' · Target: '+target+' doz':''}</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            ${ttsBtn}
+            ${canEdit ? `<button class="qty-btn" onclick="openEditItem('${it.id}')" style="font-size:13px">✏️</button>` : ''}
+          </div>
+        </div>
+        <div style="margin-top:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <span style="font-size:12px;color:var(--text-secondary)">Fresh stock</span>
+            <div class="qty-ctrl">
+              <button class="qty-btn" onclick="adjustStock('${it.id}','${loc.id}',-1)">−</button>
+              <span class="qty-num">${stock}</span>
+              <button class="qty-btn" onclick="adjustStock('${it.id}','${loc.id}',1)">+</button>
+            </div>
+          </div>
+          ${canEdit ? `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <span style="font-size:12px;color:var(--text-secondary)">Frozen</span>
+            <div class="qty-ctrl">
+              <button class="qty-btn" onclick="adjustFrozen('${it.id}','${loc.id}',-1)">−</button>
+              <span class="qty-num">${frozen}</span>
+              <button class="qty-btn" onclick="adjustFrozen('${it.id}','${loc.id}',1)">+</button>
+            </div>
+          </div>` : ''}
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${fillColor}"></div></div>
+          ${needed > 0 ? `<div style="font-size:11px;color:var(--red);margin-top:4px">Need ${needed} more doz to hit target</div>` : '<div style="font-size:11px;color:var(--green);margin-top:4px">On target ✓</div>'}
+        </div>
+      </div>`;
+    });
+  });
+  container.innerHTML = html;
+}
+
+async function adjustStock(itemId, locId, delta) {
+  const it = state.items.find(i => i.id === itemId);
+  if (!it) return;
+  if (!it.stock) it.stock = {};
+  it.stock[locId] = Math.max(0, (it.stock[locId] || 0) + delta);
+  await fbPatch(`items/${itemId}`, { stock: it.stock });
+  renderItems();
+  renderOverview();
+}
+
+async function adjustFrozen(itemId, locId, delta) {
+  const it = state.items.find(i => i.id === itemId);
+  if (!it) return;
+  if (!it.frozen) it.frozen = {};
+  it.frozen[locId] = Math.max(0, (it.frozen[locId] || 0) + delta);
+  await fbPatch(`items/${itemId}`, { frozen: it.frozen });
+  renderItems();
+}
+
+// ── INGREDIENTS ────────────────────────────────────────────
+function renderIngredients() {
+  const search = document.getElementById('ing-search').value.toLowerCase();
+  const container = document.getElementById('ing-list');
+  const cats = ['all', ...new Set(state.ingredients.map(i => i.category).filter(Boolean))];
+  buildFilterPills('ing-filter-pills', cats, ingFilter, v => { ingFilter = v; renderIngredients(); });
+
+  let ings = state.ingredients;
+  if (search) ings = ings.filter(i => i.name.toLowerCase().includes(search));
+  if (ingFilter !== 'all') ings = ings.filter(i => i.category === ingFilter);
+
+  if (!ings.length) { container.innerHTML = '<div class="empty-state"><p>No ingredients found</p></div>'; return; }
+
+  // Group by supplier
+  const bySupplier = {};
+  ings.forEach(ing => {
+    const sup = state.suppliers.find(s => s.id === ing.supplierId);
+    const key = sup ? sup.name : 'Other';
+    if (!bySupplier[key]) bySupplier[key] = [];
+    bySupplier[key].push(ing);
+  });
+
+  let html = '';
+  Object.entries(bySupplier).forEach(([supName, list]) => {
+    html += `<div class="section-label">${supName}</div><div class="card">`;
+    list.forEach(ing => {
+      const pct = Math.min(100, Math.round(ing.qty / (ing.min * 2 || 1) * 100));
+      const isLow = ing.qty < ing.min;
+      const fillColor = isLow ? 'var(--red)' : ing.qty < ing.min * 1.5 ? 'var(--amber)' : 'var(--green)';
+      html += `<div class="list-row">
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="row-name">${ing.name}</span>
+            ${isLow ? '<span class="badge badge-red">Low</span>' : ''}
+          </div>
+          <div class="row-sub">${ing.qty} ${ing.unit} · Reorder at ${ing.min}</div>
+          <div class="progress-bar" style="margin-top:5px"><div class="progress-fill" style="width:${pct}%;background:${fillColor}"></div></div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;margin-left:8px">
+          <div class="qty-ctrl">
+            <button class="qty-btn" onclick="adjustIng('${ing.id}',-1)">−</button>
+            <span class="qty-num" style="min-width:28px">${ing.qty}</span>
+            <button class="qty-btn" onclick="adjustIng('${ing.id}',1)">+</button>
+          </div>
+          <button class="qty-btn" onclick="openEditIngredient('${ing.id}')" style="font-size:13px">✏️</button>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  container.innerHTML = html;
+}
+
+async function adjustIng(ingId, delta) {
+  const ing = state.ingredients.find(i => i.id === ingId);
+  if (!ing) return;
+  ing.qty = Math.max(0, (ing.qty || 0) + delta);
+  await fbPatch(`ingredients/${ingId}`, { qty: ing.qty });
+  renderIngredients();
+  renderOverview();
+}
+
+// ── TRANSFERS ─────────────────────────────────────────────
+function renderTransfers() {
+  const c = document.getElementById('transfers-content');
+  const isRetailOnly = state.locations.find(l => l.id === session.locationId)?.type === 'retail';
+  const isBakerOrOwner = session.role === 'baker' || session.role === 'owner';
+
+  let html = '';
+
+  // Request form for retail locations
+  if (isRetailOnly || session.role === 'owner') {
+    html += `<div class="section-label">Request transfer</div><div class="card">`;
+    html += `<div style="margin-bottom:10px"><div class="field-label" style="margin-bottom:6px">FROM LOCATION</div>
+      <select id="xfer-from">${state.locations.filter(l=>l.type!=='retail').map(l=>`<option value="${l.id}">${l.name}</option>`).join('')}</select></div>`;
+    html += `<div style="margin-bottom:10px"><div class="field-label" style="margin-bottom:6px">TO LOCATION</div>
+      <select id="xfer-to">${state.locations.map(l=>`<option value="${l.id}">${l.name}</option>`).join('')}</select></div>`;
+    html += `<div class="field-label" style="margin-bottom:6px">ITEMS</div>`;
+    state.items.forEach(it => {
+      html += `<div class="list-row">
+        <span class="row-name">${it.name}</span>
+        <div class="qty-ctrl">
+          <button class="qty-btn" onclick="adjXferReq('${it.id}',-1)">−</button>
+          <span class="qty-num" id="xreq-${it.id}">0</span>
+          <button class="qty-btn" onclick="adjXferReq('${it.id}',1)">+</button>
+        </div>
+        <span style="font-size:11px;color:var(--text-muted);min-width:24px">doz</span>
+      </div>`;
+    });
+    html += `<button class="btn btn-teal" onclick="submitTransfer()" style="margin-top:1rem">Send request</button></div>`;
+  }
+
+  // Pending transfers (for baker/owner or production locations)
+  const pending = state.transfers.filter(t => t.status === 'pending');
+  if (pending.length) {
+    html += `<div class="section-label">Pending (${pending.length})</div>`;
+    pending.forEach(t => {
+      const fromLoc = state.locations.find(l => l.id === t.fromId);
+      const toLoc = state.locations.find(l => l.id === t.toId);
+      const isMyLoc = t.fromId === session.locationId || t.toId === session.locationId || session.role === 'owner';
+      if (!isMyLoc) return;
+      html += `<div class="card">
+        <div class="card-header"><span class="card-title">${fromLoc?.name||'?'} → ${toLoc?.name||'?'}</span><span class="badge badge-amber">Pending</span></div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px">${t.date||''}</div>
+        ${t.items.map(it=>`<div class="list-row"><span class="row-name">${it.name}</span><span class="badge badge-gray">${it.qty} doz</span></div>`).join('')}
+        ${isBakerOrOwner ? `<button class="btn btn-primary" onclick="fulfillTransfer('${t.id}')" style="margin-top:10px">Mark fulfilled</button>` : ''}
+      </div>`;
+    });
+  }
+
+  const done = state.transfers.filter(t => t.status === 'fulfilled');
+  if (done.length) {
+    html += `<div class="section-label">Fulfilled</div>`;
+    done.slice(-5).reverse().forEach(t => {
+      const fromLoc = state.locations.find(l => l.id === t.fromId);
+      const toLoc = state.locations.find(l => l.id === t.toId);
+      html += `<div class="card" style="opacity:.65">
+        <div class="card-header"><span class="card-title">${fromLoc?.name||'?'} → ${toLoc?.name||'?'}</span><span class="badge badge-green">Fulfilled</span></div>
+        <div style="font-size:11px;color:var(--text-muted)">${t.date||''}</div>
+      </div>`;
+    });
+  }
+
+  if (!html) html = '<div class="empty-state"><svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg><p>No transfers yet</p></div>';
+  c.innerHTML = html;
+}
+
+const xferReqs = {};
+function adjXferReq(itemId, delta) {
+  xferReqs[itemId] = Math.max(0, (xferReqs[itemId]||0) + delta);
+  const el = document.getElementById('xreq-'+itemId);
+  if (el) el.textContent = xferReqs[itemId];
+}
+
+async function submitTransfer() {
+  const items = state.items.map(it => ({name:it.name, qty:xferReqs[it.id]||0, itemId:it.id})).filter(x=>x.qty>0);
+  if (!items.length) { alert('Add at least one item.'); return; }
+  const fromId = document.getElementById('xfer-from')?.value;
+  const toId = document.getElementById('xfer-to')?.value;
+  if (fromId === toId) { alert('From and To locations must be different.'); return; }
+  const t = { fromId, toId, items, status:'pending', date: new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) };
+  const id = await fbPush('transfers', t);
+  state.transfers.push({id,...t});
+  Object.keys(xferReqs).forEach(k => xferReqs[k]=0);
+  renderTransfers();
+  updateTransferBadge();
+}
+
+async function fulfillTransfer(tid) {
+  const t = state.transfers.find(x => x.id === tid);
+  if (!t) return;
+  for (const it of t.items) {
+    const item = state.items.find(i => i.id === it.itemId);
+    if (item) {
+      if (!item.stock) item.stock = {};
+      item.stock[t.fromId] = Math.max(0, (item.stock[t.fromId]||0) - it.qty);
+      item.stock[t.toId] = (item.stock[t.toId]||0) + it.qty;
+      await fbPatch(`items/${item.id}`, { stock: item.stock });
+    }
+  }
+  t.status = 'fulfilled';
+  await fbPatch(`transfers/${tid}`, { status:'fulfilled' });
+  renderTransfers();
+  renderOverview();
+  updateTransferBadge();
+}
+
+function updateTransferBadge() {
+  const pending = state.transfers.filter(t => t.status === 'pending').length;
+  const badge = document.getElementById('transfer-badge');
+  if (pending > 0) { badge.textContent = pending; badge.style.display = 'block'; }
+  else { badge.style.display = 'none'; }
+}
+
+function pollTransfers() {
+  setInterval(async () => {
+    const data = await fbGet('transfers');
+    state.transfers = objToArr(data);
+    updateTransferBadge();
+    if (document.getElementById('page-transfers').classList.contains('active')) renderTransfers();
+    if (document.getElementById('page-overview').classList.contains('active')) renderOverview();
+  }, 15000);
+}
+
+// ── SETTINGS ──────────────────────────────────────────────
+function renderSettings() {
+  const lc = document.getElementById('settings-locations');
+  lc.innerHTML = state.locations.map(l => `<div class="list-row">
+    <div style="flex:1">
+      <div class="row-name">${l.name}</div>
+      <div class="row-sub">${l.type === 'both' ? 'Bakery + Retail' : l.type === 'production' ? 'Production/Kitchen' : 'Retail only'}</div>
+    </div>
+    <button class="qty-btn" onclick="openEditLocation('${l.id}')" style="font-size:13px">✏️</button>
+    <button class="qty-btn" onclick="deleteLocation('${l.id}')" style="font-size:13px;color:var(--red)">✕</button>
+  </div>`).join('');
+
+  const sc = document.getElementById('settings-suppliers');
+  sc.innerHTML = state.suppliers.map(s => `<div class="list-row">
+    <span class="row-name">${s.name}</span>
+    <button class="qty-btn" onclick="deleteSupplier('${s.id}')" style="font-size:13px;color:var(--red)">✕</button>
+  </div>`).join('') || '<div style="font-size:13px;color:var(--text-muted);padding:8px 0">No suppliers</div>';
+
+  document.getElementById('pin-owner-display').textContent = state.pins.owner;
+  document.getElementById('pin-baker-display').textContent = state.pins.baker;
+  document.getElementById('pin-cashier-display').textContent = state.pins.cashier;
+}
+
+// ── MODALS ────────────────────────────────────────────────
+function openModal(html) {
+  document.getElementById('modal-content').innerHTML = `<div class="modal-handle"></div>${html}`;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal-overlay')) return;
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+function closeModalDirect() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function openAddItem() {
+  const catOptions = ['Cookie','Bar','Brownie','Cake','Other'].map(c=>`<option>${c}</option>`).join('');
+  openModal(`<div class="modal-title">Add item</div>
+    <div class="field-group"><div class="field-label">NAME</div><input type="text" id="m-name" placeholder="e.g. Chocolate Chip"></div>
+    <div class="field-group"><div class="field-label">CATEGORY</div><select id="m-cat">${catOptions}</select></div>
+    <div class="field-group"><div class="field-label">DAILY TARGET (doz)</div><input type="number" id="m-target" placeholder="0" min="0"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModalDirect()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAddItem()">Add</button>
+    </div>`);
+}
+
+async function saveAddItem() {
+  const name = document.getElementById('m-name').value.trim();
+  const category = document.getElementById('m-cat').value;
+  const target = parseInt(document.getElementById('m-target').value) || 0;
+  if (!name) { alert('Enter a name.'); return; }
+  const item = { name, category, target, stock:{}, frozen:{}, notes:'' };
+  const id = await fbPush('items', item);
+  state.items.push({id,...item});
+  closeModalDirect();
+  renderItems();
+  renderOverview();
+}
+
+function openEditItem(itemId) {
+  const it = state.items.find(i => i.id === itemId);
+  if (!it) return;
+  const catOptions = ['Cookie','Bar','Brownie','Cake','Other'].map(c=>`<option ${it.category===c?'selected':''}>${c}</option>`).join('');
+  openModal(`<div class="modal-title">Edit ${it.name}</div>
+    <div class="field-group"><div class="field-label">NAME</div><input type="text" id="m-name" value="${it.name}"></div>
+    <div class="field-group"><div class="field-label">CATEGORY</div><select id="m-cat">${catOptions}</select></div>
+    <div class="field-group"><div class="field-label">DAILY TARGET (doz)</div><input type="number" id="m-target" value="${it.target||0}" min="0"></div>
+    <div class="modal-actions">
+      <button class="btn btn-danger btn-sm" onclick="deleteItem('${itemId}')">Delete</button>
+      <button class="btn btn-outline" onclick="closeModalDirect()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditItem('${itemId}')">Save</button>
+    </div>`);
+}
+
+async function saveEditItem(itemId) {
+  const it = state.items.find(i => i.id === itemId);
+  if (!it) return;
+  it.name = document.getElementById('m-name').value.trim();
+  it.category = document.getElementById('m-cat').value;
+  it.target = parseInt(document.getElementById('m-target').value) || 0;
+  await fbPatch(`items/${itemId}`, { name:it.name, category:it.category, target:it.target });
+  closeModalDirect();
+  renderItems();
+  renderOverview();
+}
+
+async function deleteItem(itemId) {
+  if (!confirm('Delete this item?')) return;
+  await fbDelete(`items/${itemId}`);
+  state.items = state.items.filter(i => i.id !== itemId);
+  closeModalDirect();
+  renderItems();
+  renderOverview();
+}
+
+function openAddIngredient() {
+  const supOptions = state.suppliers.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  openModal(`<div class="modal-title">Add ingredient</div>
+    <div class="field-group"><div class="field-label">NAME</div><input type="text" id="m-name" placeholder="e.g. All-purpose flour"></div>
+    <div class="field-group"><div class="field-label">CATEGORY</div><input type="text" id="m-cat" placeholder="e.g. Dry, Dairy, Mix-ins"></div>
+    <div class="field-group"><div class="field-label">UNIT</div><input type="text" id="m-unit" placeholder="lbs, doz, btl..."></div>
+    <div class="field-group"><div class="field-label">CURRENT QTY</div><input type="number" id="m-qty" value="0" min="0"></div>
+    <div class="field-group"><div class="field-label">REORDER LEVEL</div><input type="number" id="m-min" value="0" min="0"></div>
+    <div class="field-group"><div class="field-label">SUPPLIER</div><select id="m-sup">${supOptions}</select></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModalDirect()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAddIngredient()">Add</button>
+    </div>`);
+}
+
+async function saveAddIngredient() {
+  const name = document.getElementById('m-name').value.trim();
+  if (!name) { alert('Enter a name.'); return; }
+  const ing = {
+    name, category: document.getElementById('m-cat').value.trim(),
+    unit: document.getElementById('m-unit').value.trim() || 'unit',
+    qty: parseInt(document.getElementById('m-qty').value) || 0,
+    min: parseInt(document.getElementById('m-min').value) || 0,
+    supplierId: document.getElementById('m-sup').value
+  };
+  const id = await fbPush('ingredients', ing);
+  state.ingredients.push({id,...ing});
+  closeModalDirect();
+  renderIngredients();
+}
+
+function openEditIngredient(ingId) {
+  const ing = state.ingredients.find(i => i.id === ingId);
+  if (!ing) return;
+  const supOptions = state.suppliers.map(s=>`<option value="${s.id}" ${ing.supplierId===s.id?'selected':''}>${s.name}</option>`).join('');
+  openModal(`<div class="modal-title">Edit ${ing.name}</div>
+    <div class="field-group"><div class="field-label">NAME</div><input type="text" id="m-name" value="${ing.name}"></div>
+    <div class="field-group"><div class="field-label">CATEGORY</div><input type="text" id="m-cat" value="${ing.category||''}"></div>
+    <div class="field-group"><div class="field-label">UNIT</div><input type="text" id="m-unit" value="${ing.unit||''}"></div>
+    <div class="field-group"><div class="field-label">CURRENT QTY</div><input type="number" id="m-qty" value="${ing.qty||0}"></div>
+    <div class="field-group"><div class="field-label">REORDER LEVEL</div><input type="number" id="m-min" value="${ing.min||0}"></div>
+    <div class="field-group"><div class="field-label">SUPPLIER</div><select id="m-sup">${supOptions}</select></div>
+    <div class="modal-actions">
+      <button class="btn btn-danger btn-sm" onclick="deleteIngredient('${ingId}')">Delete</button>
+      <button class="btn btn-outline" onclick="closeModalDirect()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditIngredient('${ingId}')">Save</button>
+    </div>`);
+}
+
+async function saveEditIngredient(ingId) {
+  const ing = state.ingredients.find(i => i.id === ingId);
+  if (!ing) return;
+  ing.name = document.getElementById('m-name').value.trim();
+  ing.category = document.getElementById('m-cat').value.trim();
+  ing.unit = document.getElementById('m-unit').value.trim();
+  ing.qty = parseInt(document.getElementById('m-qty').value) || 0;
+  ing.min = parseInt(document.getElementById('m-min').value) || 0;
+  ing.supplierId = document.getElementById('m-sup').value;
+  await fbPatch(`ingredients/${ingId}`, ing);
+  closeModalDirect();
+  renderIngredients();
+}
+
+async function deleteIngredient(ingId) {
+  if (!confirm('Delete this ingredient?')) return;
+  await fbDelete(`ingredients/${ingId}`);
+  state.ingredients = state.ingredients.filter(i => i.id !== ingId);
+  closeModalDirect();
+  renderIngredients();
+}
+
+function openAddLocation() {
+  openModal(`<div class="modal-title">Add location</div>
+    <div class="field-group"><div class="field-label">NAME</div><input type="text" id="m-name" placeholder="e.g. Port Washington"></div>
+    <div class="field-group"><div class="field-label">TYPE</div><select id="m-type">
+      <option value="retail">Retail only (sells, no baking)</option>
+      <option value="both">Bakery + Retail</option>
+      <option value="production">Production/Kitchen only</option>
+    </select></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModalDirect()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAddLocation()">Add</button>
+    </div>`);
+}
+
+async function saveAddLocation() {
+  const name = document.getElementById('m-name').value.trim();
+  const type = document.getElementById('m-type').value;
+  if (!name) { alert('Enter a name.'); return; }
+  const loc = { name, type };
+  const id = await fbPush('locations', loc);
+  state.locations.push({id,...loc});
+  closeModalDirect();
+  renderSettings();
+}
+
+function openEditLocation(locId) {
+  const loc = state.locations.find(l => l.id === locId);
+  if (!loc) return;
+  openModal(`<div class="modal-title">Edit ${loc.name}</div>
+    <div class="field-group"><div class="field-label">NAME</div><input type="text" id="m-name" value="${loc.name}"></div>
+    <div class="field-group"><div class="field-label">TYPE</div><select id="m-type">
+      <option value="retail" ${loc.type==='retail'?'selected':''}>Retail only</option>
+      <option value="both" ${loc.type==='both'?'selected':''}>Bakery + Retail</option>
+      <option value="production" ${loc.type==='production'?'selected':''}>Production/Kitchen only</option>
+    </select></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModalDirect()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditLocation('${locId}')">Save</button>
+    </div>`);
+}
+
+async function saveEditLocation(locId) {
+  const loc = state.locations.find(l => l.id === locId);
+  if (!loc) return;
+  loc.name = document.getElementById('m-name').value.trim();
+  loc.type = document.getElementById('m-type').value;
+  await fbPatch(`locations/${locId}`, { name:loc.name, type:loc.type });
+  closeModalDirect();
+  renderSettings();
+}
+
+async function deleteLocation(locId) {
+  if (!confirm('Delete this location?')) return;
+  await fbDelete(`locations/${locId}`);
+  state.locations = state.locations.filter(l => l.id !== locId);
+  renderSettings();
+}
+
+function openAddSupplier() {
+  openModal(`<div class="modal-title">Add supplier</div>
+    <div class="field-group"><div class="field-label">NAME</div><input type="text" id="m-name" placeholder="e.g. Gordon Food Service"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModalDirect()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAddSupplier()">Add</button>
+    </div>`);
+}
+
+async function saveAddSupplier() {
+  const name = document.getElementById('m-name').value.trim();
+  if (!name) { alert('Enter a name.'); return; }
+  const id = await fbPush('suppliers', { name });
+  state.suppliers.push({ id, name });
+  closeModalDirect();
+  renderSettings();
+}
+
+async function deleteSupplier(supId) {
+  if (!confirm('Delete this supplier?')) return;
+  await fbDelete(`suppliers/${supId}`);
+  state.suppliers = state.suppliers.filter(s => s.id !== supId);
+  renderSettings();
+}
+
+function openChangePins() {
+  openModal(`<div class="modal-title">Change PINs</div>
+    <div class="field-group"><div class="field-label">OWNER PIN</div><input type="password" id="m-pin-owner" value="${state.pins.owner}" inputmode="numeric" maxlength="6"></div>
+    <div class="field-group"><div class="field-label">BAKER PIN</div><input type="password" id="m-pin-baker" value="${state.pins.baker}" inputmode="numeric" maxlength="6"></div>
+    <div class="field-group"><div class="field-label">CASHIER PIN</div><input type="password" id="m-pin-cashier" value="${state.pins.cashier}" inputmode="numeric" maxlength="6"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModalDirect()">Cancel</button>
+      <button class="btn btn-primary" onclick="savePins()">Save</button>
+    </div>`);
+}
+
+async function savePins() {
+  state.pins.owner = document.getElementById('m-pin-owner').value || state.pins.owner;
+  state.pins.baker = document.getElementById('m-pin-baker').value || state.pins.baker;
+  state.pins.cashier = document.getElementById('m-pin-cashier').value || state.pins.cashier;
+  await fbSet('pins', state.pins);
+  closeModalDirect();
+  renderSettings();
+}
+
+// ── FILTER PILLS ──────────────────────────────────────────
+function buildFilterPills(containerId, cats, active, onClick) {
+  const c = document.getElementById(containerId);
+  c.innerHTML = cats.map(cat => `<div class="filter-pill ${active===cat?'active':''}" onclick="(${onClick.toString()})('${cat}',this)">${cat === 'all' ? 'All' : cat}</div>`).join('');
+}
+
+// ── TTS ───────────────────────────────────────────────────
+function speakItem(name, needed, locName) {
+  if (!('speechSynthesis' in window)) { alert('Text-to-speech not supported on this device.'); return; }
+  window.speechSynthesis.cancel();
+  let text = needed > 0
+    ? `${name} at ${locName}: need ${needed} dozen more to hit target.`
+    : `${name} at ${locName}: on target.`;
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.rate = 0.95;
+  document.getElementById('tts-status').textContent = `Reading: ${name}`;
+  document.getElementById('items-tts-bar').style.display = 'block';
+  window.speechSynthesis.speak(utt);
+  utt.onend = () => { document.getElementById('tts-status').textContent = 'Done.'; };
+}
+
+function stopTTS() {
+  window.speechSynthesis.cancel();
+  document.getElementById('tts-status').textContent = 'Stopped.';
+}
+</script>
+</body>
+</html>
