@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Lakeside Cookie Co — Inventory</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #FAF7F2;
+  --warm-white: #FFFDF9;
+  --brown-dark: #2C1A0E;
+  --brown-mid: #6B3F1F;
+  --brown-light: #C4926A;
+  --brown-pale: #EDD9C5;
+  --teal: #2A7C6F;
+  --teal-light: #D4EEEA;
+  --teal-pale: #EDF7F5;
+  --amber: #D4860A;
+  --amber-light: #FDF0D5;
+  --red: #B83232;
+  --red-light: #FDEAEA;
+  --green: #2E7D4F;
+  --green-light: #E4F4EB;
+  --border: #E8DDD3;
+  --text-primary: #2C1A0E;
+  --text-secondary: #7A5C46;
+  --text-muted: #B09585;
+  --shadow-sm: 0 1px 3px rgba(44,26,14,0.08);
+  --shadow-md: 0 4px 12px rgba(44,26,14,0.10);
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; background: var(--cream); font-family: 'DM Sans', sans-serif; color: var(--text-primary); }
+
+/* SCREENS */
+.screen { display: none; min-height: 100vh; flex-direction: column; }
+.screen.active { display: flex; }
+
+/* LOGIN */
+#login-screen { align-items: center; justify-content: center; padding: 2rem; background: var(--cream); }
+.login-card { background: var(--warm-white); border: 1px solid var(--border); border-radius: 20px; padding: 2.5rem 2rem; width: 100%; max-width: 360px; box-shadow: var(--shadow-md); }
+.login-logo { text-align: center; margin-bottom: 2rem; }
+.login-logo-icon { width: 64px; height: 64px; background: var(--brown-dark); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: .75rem; }
+.login-logo-icon svg { width: 36px; height: 36px; fill: var(--cream); }
+.login-title { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--brown-dark); line-height: 1.2; }
+.login-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+.field-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px; letter-spacing: .03em; }
+.field-group { margin-bottom: 1rem; }
+select, input[type=text], input[type=password] { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; font-family: 'DM Sans', sans-serif; background: var(--warm-white); color: var(--text-primary); outline: none; appearance: none; }
+select:focus, input:focus { border-color: var(--brown-light); box-shadow: 0 0 0 3px rgba(196,146,106,.15); }
+.btn { display: block; width: 100%; padding: 12px; border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: opacity .15s, transform .1s; }
+.btn:active { transform: scale(.98); }
+.btn-primary { background: var(--brown-dark); color: var(--cream); }
+.btn-primary:hover { opacity: .88; }
+.btn-teal { background: var(--teal); color: #fff; }
+.btn-teal:hover { opacity: .88; }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-primary); }
+.btn-outline:hover { background: var(--brown-pale); }
+.btn-danger { background: var(--red); color: #fff; }
+.btn-sm { padding: 6px 12px; font-size: 12px; width: auto; border-radius: 6px; }
+.error-msg { color: var(--red); font-size: 12px; margin-top: 8px; text-align: center; display: none; }
+
+/* APP LAYOUT */
+#app-screen { background: var(--cream); }
+.topbar { background: var(--warm-white); border-bottom: 1px solid var(--border); padding: 0 1rem; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.topbar-left { display: flex; align-items: center; gap: 10px; }
+.topbar-logo { font-family: 'DM Serif Display', serif; font-size: 17px; color: var(--brown-dark); line-height: 1; }
+.topbar-logo span { color: var(--brown-light); }
+.topbar-loc { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+.role-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 20px; letter-spacing: .03em; }
+.role-owner { background: var(--brown-pale); color: var(--brown-mid); }
+.role-baker { background: var(--teal-light); color: var(--teal); }
+.role-cashier { background: var(--amber-light); color: var(--amber); }
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+.icon-btn { width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary); font-size: 18px; }
+.icon-btn:hover { background: var(--brown-pale); }
+
+/* BOTTOM NAV */
+.bottom-nav { background: var(--warm-white); border-top: 1px solid var(--border); display: flex; padding: 8px 0 max(8px, env(safe-area-inset-bottom)); position: sticky; bottom: 0; z-index: 100; }
+.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 4px 0; cursor: pointer; color: var(--text-muted); transition: color .15s; border: none; background: transparent; font-family: 'DM Sans', sans-serif; }
+.nav-item.active { color: var(--brown-dark); }
+.nav-item svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.nav-item.active svg { stroke-width: 2.2; }
+.nav-label { font-size: 10px; font-weight: 500; }
+.nav-dot { width: 5px; height: 5px; background: var(--red); border-radius: 50%; position: absolute; top: 6px; right: calc(50% - 14px); }
+
+/* CONTENT */
+.content { flex: 1; overflow-y: auto; padding: 1rem; padding-bottom: 1.5rem; }
+.page { display: none; }
+.page.active { display: block; }
+
+/* CARDS */
+.card { background: var(--warm-white); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 12px; box-shadow: var(--shadow-sm); }
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.card-title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.section-label { font-size: 11px; font-weight: 600; color: var(--text-muted); letter-spacing: .06em; text-transform: uppercase; margin: 1.25rem 0 8px; }
+
+/* ROWS */
+.list-row { display: flex; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--border); gap: 10px; }
+.list-row:last-child { border-bottom: none; padding-bottom: 0; }
+.row-name { font-size: 13px; color: var(--text-primary); font-weight: 500; flex: 1; }
+.row-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+/* BADGES */
+.badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 20px; white-space: nowrap; }
+.badge-red { background: var(--red-light); color: var(--red); }
+.badge-amber { background: var(--amber-light); color: var(--amber); }
+.badge-green { background: var(--green-light); color: var(--green); }
+.badge-teal { background: var(--teal-light); color: var(--teal); }
+.badge-gray { background: var(--brown-pale); color: var(--brown-mid); }
+
+/* STAT GRID */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.stat-card { background: var(--warm-white); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .85rem 1rem; box-shadow: var(--shadow-sm); }
+.stat-label { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-bottom: 4px; }
+.stat-val { font-size: 26px; font-weight: 600; color: var(--text-primary); line-height: 1; }
+.stat-val.warn { color: var(--amber); }
+.stat-val.danger { color: var(--red); }
+
+/* ALERTS */
+.alert { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: var(--radius-sm); margin-bottom: 8px; font-size: 13px; line-height: 1.4; }
+.alert svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
+.alert-red { background: var(--red-light); color: var(--red); border: 1px solid rgba(184,50,50,.2); }
+.alert-amber { background: var(--amber-light); color: var(--amber); border: 1px solid rgba(212,134,10,.2); }
+.alert-teal { background: var(--teal-pale); color: var(--teal); border: 1px solid rgba(42,124,111,.2); }
+
+/* PROGRESS */
+.progress-bar { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; margin-top: 5px; }
+.progress-fill { height: 100%; border-radius: 3px; transition: width .3s; }
+
+/* QTY CONTROLS */
+.qty-ctrl { display: flex; align-items: center; gap: 6px; }
+.qty-btn { width: 28px; height: 28px; border: 1px solid var(--border); border-radius: 6px; background: var(--warm-white); color: var(--text-primary); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 500; transition: background .1s; }
+.qty-btn:hover { background: var(--brown-pale); }
+.qty-num { min-width: 32px; text-align: center; font-size: 14px; font-weight: 600; color: var(--text-primary); }
+
+/* SEARCH */
+.search-bar { position: relative; margin-bottom: 12px; }
+.search-bar input { padding-left: 36px; background: var(--warm-white); }
+.search-bar svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; stroke: var(--text-muted); fill: none; stroke-width: 2; stroke-linecap: round; }
+
+/* FILTER PILLS */
+.filter-pills { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; margin-bottom: 12px; scrollbar-width: none; }
+.filter-pills::-webkit-scrollbar { display: none; }
+.filter-pill { padding: 5px 12px; border: 1px solid var(--border); border-radius: 20px; font-size: 12px; font-weight: 500; white-space: nowrap; cursor: pointer; background: var(--warm-white); color: var(--text-secondary); transition: all .15s; }
+.filter-pill.active { background: var(--brown-dark); color: var(--cream); border-color: var(--brown-dark); }
+
+/* MODAL */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(44,26,14,.5); z-index: 200; align-items: flex-end; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--warm-white); border-radius: 20px 20px 0 0; padding: 1.5rem 1.25rem; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; padding-bottom: max(1.5rem, env(safe-area-inset-bottom)); }
+.modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 1.25rem; }
+.modal-title { font-family: 'DM Serif Display', serif; font-size: 20px; margin-bottom: 1.25rem; color: var(--brown-dark); }
+.modal-actions { display: flex; gap: 8px; margin-top: 1rem; }
+.modal-actions .btn { flex: 1; }
+
+/* TTS */
+.tts-bar { background: var(--teal-light); border: 1px solid rgba(42,124,111,.3); border-radius: var(--radius-sm); padding: 10px 12px; display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.tts-bar span { font-size: 12px; color: var(--teal); flex: 1; }
+
+/* TRANSFER REQUEST BADGE */
+.nav-badge { background: var(--red); color: #fff; border-radius: 10px; font-size: 10px; font-weight: 700; padding: 1px 5px; position: absolute; top: 4px; right: calc(50% - 18px); }
+
+/* NEED INDICATOR */
+.need-chip { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 8px; white-space: nowrap; }
+.need-high { background: var(--red-light); color: var(--red); }
+.need-med { background: var(--amber-light); color: var(--amber); }
+.need-ok { background: var(--green-light); color: var(--green); }
+.need-frozen { background: var(--teal-light); color: var(--teal); }
+
+/* TOGGLE */
+.toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
+.toggle { position: relative; width: 42px; height: 24px; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; inset: 0; background: var(--border); border-radius: 24px; cursor: pointer; transition: .2s; }
+.toggle-slider:before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: .2s; }
+input:checked + .toggle-slider { background: var(--teal); }
+input:checked + .toggle-slider:before { transform: translateX(18px); }
+
+/* SUPPLIER TAG */
+.supplier-tag { font-size: 11px; padding: 2px 7px; border-radius: 4px; background: var(--brown-pale); color: var(--brown-mid); font-weight: 500; }
+
+/* EMPTY STATE */
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
+.empty-state svg { width: 48px; height: 48px; stroke: var(--border); fill: none; stroke-width: 1.5; margin-bottom: 1rem; }
+.empty-state p { font-size: 14px; }
+
+/* LOCATION SELECTOR */
+.loc-selector { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 12px; padding-bottom: 2px; scrollbar-width: none; }
+.loc-selector::-webkit-scrollbar { display: none; }
+.loc-pill { padding: 5px 14px; border: 1px solid var(--border); border-radius: 20px; font-size: 12px; font-weight: 500; white-space: nowrap; cursor: pointer; background: var(--warm-white); color: var(--text-secondary); transition: all .15s; }
+.loc-pill.active { background: var(--brown-dark); color: var(--cream); border-color: var(--brown-dark); }
+
+/* LOADING */
+#loading-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; flex-direction: column; gap: 1rem; }
+#loading-screen .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--brown-dark); border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.divider { height: 1px; background: var(--border); margin: 12px 0; }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading-screen">
+  <div style="font-family:'DM Serif Display',serif;font-size:22px;color:var(--brown-dark)">Lakeside Cookie Co</div>
+  <div class="spinner"></div>
+  <div style="font-size:13px;color:var(--text-muted)">Connecting...</div>
+</div>
+
+<!-- LOGIN -->
+<div id="login-screen" class="screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">
+        <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="14"/><circle cx="13" cy="15" r="2" fill="var(--brown-dark)"/><circle cx="22" cy="13" r="1.5" fill="var(--brown-dark)"/><circle cx="20" cy="21" r="1.5" fill="var(--brown-dark)"/><circle cx="14" cy="22" r="1" fill="var(--brown-dark)"/></svg>
+      </div>
+      <div class="login-title">Lakeside Cookie Co</div>
+      <div class="login-sub">Inventory Management</div>
+    </div>
+    <div class="field-group">
+      <div class="field-label">YOUR LOCATION</div>
+      <select id="login-location"></select>
+    </div>
+    <div class="field-group">
+      <div class="field-label">YOUR ROLE</div>
+      <select id="login-role">
+        <option value="owner">Owner</option>
+        <option value="baker">Baker</option>
+        <option value="cashier">Cashier</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <div class="field-label">PIN</div>
+      <input type="password" id="login-pin" placeholder="Enter PIN" maxlength="6" inputmode="numeric">
+    </div>
+    <div class="error-msg" id="login-error">Incorrect PIN. Try again.</div>
+    <button class="btn btn-primary" onclick="doLogin()" style="margin-top:.5rem">Sign in</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app-screen" class="screen">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div>
+        <div class="topbar-logo">Lakeside <span>Cookie Co</span></div>
+        <div class="topbar-loc" id="topbar-loc-name">—</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <span class="role-badge" id="topbar-role-badge"></span>
+      <button class="icon-btn" onclick="doLogout()" title="Sign out">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- OVERVIEW PAGE -->
+    <div class="page active" id="page-overview">
+      <div id="alerts-container" style="display:none"></div>
+      <div class="stat-grid" id="stat-grid"></div>
+      <div class="section-label">Insights</div>
+      <div class="card" id="insights-card">
+        <div style="font-size:13px;color:var(--text-muted);text-align:center;padding:8px 0">Loading insights...</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:1.25rem;margin-bottom:6px">
+        <span class="section-label" style="margin:0">Demand by category</span>
+        <div class="filter-pills" id="graph-period-pills" style="margin:0"></div>
+      </div>
+      <div class="filter-pills" id="graph-cat-pills" style="margin-bottom:10px"></div>
+      <div class="card" style="padding:1rem">
+        <canvas id="demand-chart" height="220"></canvas>
+        <div id="chart-empty" style="text-align:center;font-size:13px;color:var(--text-muted);padding:2rem 0;display:none">No demand data yet — use the Chat tab to log needs</div>
+      </div>
+      <div class="section-label">What we need</div>
+      <div class="card"><div id="needs-list"></div></div>
+    </div>
+
+    <!-- CHAT PAGE -->
+    <div class="page" id="page-chat">
+      <div style="font-size:16px;font-weight:600;color:var(--text-primary);margin-bottom:2px">Team Chat</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;line-height:1.5">
+        Say <em>"Mequon needs 3 Oreos"</em> → goes to Delivery.<br>
+        Say <em>"Need 2 boxes of butter from Costco"</em> → goes to Shopping.
+      </div>
+
+      <!-- LIVE TRANSCRIPT -->
+      <div id="voice-transcript" style="display:none;background:var(--teal-light);border:1px solid rgba(42,124,111,.3);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:10px;font-size:14px;color:var(--teal);min-height:40px;line-height:1.5">
+        <span style="font-size:11px;font-weight:600;display:block;margin-bottom:4px">🎤 LISTENING...</span>
+        <span id="transcript-text">Speak now...</span>
+      </div>
+
+      <div id="chat-messages" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:10px;max-height:calc(100vh - 320px);min-height:200px;padding:4px 0"></div>
+
+      <div style="position:sticky;bottom:0;background:var(--cream);padding:8px 0 0">
+        <div style="display:flex;gap:8px;align-items:flex-end">
+          <div style="flex:1;background:var(--warm-white);border:1px solid var(--border);border-radius:20px;padding:8px 14px;display:flex;align-items:center;gap:8px">
+            <textarea id="chat-input" placeholder="e.g. Mequon needs 3 Oreos / Need butter from Costco..." rows="1"
+              style="flex:1;border:none;background:transparent;font-family:inherit;font-size:14px;color:var(--text-primary);resize:none;outline:none;max-height:100px;overflow-y:auto"
+              onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage()}"
+              oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+            <button onclick="startChatVoice()" id="chat-mic-btn" title="Voice input"
+              style="background:none;border:none;cursor:pointer;padding:2px;color:var(--text-muted);flex-shrink:0;transition:color .2s">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+              </svg>
+            </button>
+          </div>
+          <button onclick="sendChatMessage()" style="width:42px;height:42px;border-radius:50%;background:var(--brown-dark);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" width="18" height="18"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DELIVERY PAGE -->
+    <div class="page" id="page-delivery">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="font-size:16px;font-weight:600;color:var(--text-primary)">Delivery</div>
+        <button class="btn btn-sm btn-outline" onclick="clearDelivered()">Remove completed</button>
+      </div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Tap any item to mark as collected. Tap again to undo.</div>
+      <div id="delivery-mequon-section" style="margin-bottom:16px">
+        <div onclick="toggleDeliverySection('mequon')" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:8px 12px;background:var(--warm-white);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px">
+          <span style="font-size:14px;font-weight:600;color:var(--text-primary)">📍 Mequon</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="badge badge-amber" id="mequon-count">0 items</span>
+            <svg id="mequon-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div id="delivery-mequon" class="card" style="padding:8px 12px"></div>
+      </div>
+      <div id="delivery-cedarburg-section">
+        <div onclick="toggleDeliverySection('cedarburg')" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:8px 12px;background:var(--warm-white);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px">
+          <span style="font-size:14px;font-weight:600;color:var(--text-primary)">📍 Cedarburg</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="badge badge-amber" id="cedarburg-count">0 items</span>
+            <svg id="cedarburg-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div id="delivery-cedarburg" class="card" style="padding:8px 12px"></div>
+      </div>
+    </div>
+
+    <!-- SHOPPING PAGE -->
+    <div class="page" id="page-shopping">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <div style="font-size:16px;font-weight:600;color:var(--text-primary)">Shopping List</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-sm btn-outline" onclick="clearCheckedShopping()">Remove completed</button>
+          <button class="btn btn-sm btn-teal" onclick="copyShoppingList()">Copy</button>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Tap any item to check it off as you shop. Tap again to undo.</div>
+      <div class="filter-pills" id="shopping-supplier-pills" style="margin-bottom:12px"></div>
+      <div id="shopping-checklist"></div>
+      <div id="shopping-empty" style="text-align:center;padding:3rem 1rem;color:var(--text-muted);display:none">
+        <div style="font-size:36px;margin-bottom:12px">🛒</div>
+        <div style="font-size:14px;font-weight:500">Shopping list is empty</div>
+        <div style="font-size:13px;margin-top:6px">Use the Chat tab to add ingredients</div>
+      </div>
+    </div>
+
+    <!-- SETTINGS PAGE -->
+    <div class="page" id="page-settings">
+      <div class="section-label">Locations</div>
+      <div class="card" id="settings-locations"></div>
+      <button class="btn btn-outline" onclick="openAddLocation()" style="margin-bottom:12px">+ Add location</button>
+      <div class="section-label">Suppliers</div>
+      <div class="card" id="settings-suppliers"></div>
+      <button class="btn btn-outline" onclick="openAddSupplier()" style="margin-bottom:12px">+ Add supplier</button>
+      <div class="section-label">PINs</div>
+      <div class="card">
+        <div class="list-row"><div class="row-name">Owner PIN</div><span class="badge badge-gray" id="pin-owner-display"></span></div>
+        <div class="list-row"><div class="row-name">Baker PIN</div><span class="badge badge-gray" id="pin-baker-display"></span></div>
+        <div class="list-row"><div class="row-name">Cashier PIN</div><span class="badge badge-gray" id="pin-cashier-display"></span></div>
+      </div>
+      <button class="btn btn-outline" onclick="openChangePins()">Change PINs</button>
+      <div class="section-label" style="margin-top:1.5rem">Danger zone</div>
+      <div class="card" style="border-color:rgba(184,50,50,.3)">
+        <div style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;line-height:1.5">Reload all ingredients from your master list. Quantities reset to 0.</div>
+        <button class="btn btn-danger" onclick="confirmReloadIngredients()">Reload ingredient list</button>
+        <div id="reset-log" style="margin-top:10px;font-size:12px;color:var(--text-secondary);display:none;max-height:200px;overflow-y:auto;background:var(--cream);border-radius:8px;padding:8px"></div>
+      </div>
+      <div style="height:2rem"></div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav" id="bottom-nav">
+    <button class="nav-item active" onclick="showPage('overview',this)" id="nav-overview">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      <span class="nav-label">Overview</span>
+    </button>
+    <button class="nav-item" onclick="showPage('chat',this)" id="nav-chat">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span class="nav-label">Chat</span>
+    </button>
+    <button class="nav-item" onclick="showPage('delivery',this)" id="nav-delivery" style="position:relative">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      <span class="nav-label">Delivery</span>
+      <span class="nav-badge" id="delivery-badge" style="display:none">0</span>
+    </button>
+    <button class="nav-item" onclick="showPage('shopping',this)" id="nav-shopping" style="position:relative">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      <span class="nav-label">Shopping</span>
+      <span class="nav-badge" id="shopping-badge" style="display:none">0</span>
+    </button>
+    <button class="nav-item" onclick="showPage('settings',this)" id="nav-settings">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span class="nav-label">Settings</span>
+    </button>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<script>
+// GAS URL defined below in backend section
+
+const EJS_SERVICE = 'service_heumu62';
+const EJS_TEMPLATE = 'template_qkbqejq';
+const EJS_KEY = 'rTgWDOHTMm7j6LpLO';
+const OWNER_EMAIL = 'tommycastle08@gmail.com';
+const PRODUCT_CATEGORIES = ['Bars','Brownies','Cake Slices','Cookies','Frozen Items','Frozen Take & Bake','Mini Cakes','Other'];
+
+let state = { locations:[], items:[], ingredients:[], transfers:[], suppliers:[], pins:{owner:'1234',baker:'2222',cashier:'3333'} };
+let session = { role:null, locationId:null, locationName:null };
+let chatMessages = [];
+let deliveryItems = [];
+let shoppingListItems = [];
+let demandChart = null;
+let graphPeriod = 'week';
+let graphCategory = 'Cookies';
+let shoppingSupplierFilter = 'all';
+let emailJsReady = false;
+let deliverySectionState = { mequon: true, cedarburg: true };
+
+// ── FIREBASE ──────────────────────────────────────────────
+// ── SUPABASE BACKEND ─────────────────────────────────────
+const SB_URL = 'https://kwrfiglnvgigennuhoni.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3cmZpZ2xudmdpZ2VubnVob25pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5Mjk5NzksImV4cCI6MjA5NTUwNTk3OX0.PtLtpfr_kRqyHmNls8pusIcmDKKvcRF45hP0jDdut60';
+const SB_HEADERS = {'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates'};
+
+async function sbGet(key) {
+  try {
+    const r = await fetch(SB_URL + '/rest/v1/store?key=eq.' + encodeURIComponent(key) + '&select=value', {headers: SB_HEADERS, signal: AbortSignal.timeout(5000)});
+    const j = await r.json();
+    return j && j[0] ? j[0].value : null;
+  } catch(e) { return null; }
+}
+
+async function sbGetAll() {
+  try {
+    const r = await fetch(SB_URL + '/rest/v1/store?select=key,value', {headers: SB_HEADERS, signal: AbortSignal.timeout(8000)});
+    const rows = await r.json();
+    if (!Array.isArray(rows)) return {};
+    const result = {};
+    rows.forEach(row => { result[row.key] = row.value; });
+    return result;
+  } catch(e) { return {};  }
+}
+
+async function sbSet(key, value) {
+  try {
+    await fetch(SB_URL + '/rest/v1/store', {
+      method: 'POST',
+      headers: SB_HEADERS,
+      body: JSON.stringify({key, value})
+    });
+  } catch(e) {}
+}
+
+async function sbDelete(key) {
+  try {
+    await fetch(SB_URL + '/rest/v1/store?key=eq.' + encodeURIComponent(key), {
+      method: 'DELETE', headers: SB_HEADERS
+    });
+  } catch(e) {}
+}
+
+function genId() { return Date.now().toString(36) + Math.random().toString(36).substr(2,5); }
+
+async function fbGet(key) { return await sbGet(key); }
+async function fbSet(key, data) { await sbSet(key, data); }
+async function fbPush(collection, data) {
+  const id = genId();
+  const existing = (await sbGet(collection)) || {};
+  existing[id] = data;
+  await sbSet(collection, existing);
+  return id;
+}
+async function fbPatch(path, data) {
+  const parts = path.split('/'), col = parts[0], id = parts[1];
+  const existing = (await sbGet(col)) || {};
+  if (id) { existing[id] = Object.assign({}, existing[id]||{}, data); }
+  else { Object.assign(existing, data); }
+  await sbSet(col, existing);
+}
+async function fbDelete(path) {
+  const parts = path.split('/'), col = parts[0], id = parts[1];
+  if (id) {
+    const existing = (await sbGet(col)) || {};
+    delete existing[id];
+    await sbSet(col, existing);
+  } else { await sbDelete(col); }
+}
+function objToArr(obj) {
+  if (!obj || typeof obj !== 'object') return [];
+  return Object.entries(obj).map(([id,v]) => { const base = typeof v === 'object' && v !== null ? v : {value:v}; return Object.assign({id}, base); });
+}
+
+// ── LOAD ──────────────────────────────────────────────────
+async function loadAll() {
+  try {
+    // Load all data from Google Apps Script in one call
+    const all = await sbGetAll();
+    state.locations = objToArr(all.locations);
+    state.items = objToArr(all.items);
+    state.ingredients = objToArr(all.ingredients);
+    state.suppliers = objToArr(all.suppliers);
+    if (all.pins) state.pins = all.pins;
+    chatMessages = objToArr(all.teamChat).sort((a,b) => (a.ts||0)-(b.ts||0));
+    deliveryItems = objToArr(all.deliveryList).sort((a,b) => (a.ts||0)-(b.ts||0));
+    shoppingListItems = objToArr(all.shoppingList).sort((a,b) => (a.ts||0)-(b.ts||0));
+    if (state.locations.length === 0) await seedDefaults();
+    await seedIngredientsIfEmpty();
+  } catch(e) {
+    console.error('Load error:', e);
+  }
+  initEmailJS();
+}
+
+async function seedDefaults() {
+  const locs = [{name:'Cedarburg',type:'both'},{name:'Mequon',type:'retail'}];
+  for (const l of locs) { const id = await fbPush('locations', l); state.locations.push({id,...l}); }
+  const suppliers = ['Costco','Meijer','Restaurant Depot',"Gordon's / Webstaurant"];
+  for (const s of suppliers) { const id = await fbPush('suppliers', {name:s}); state.suppliers.push({id,name:s}); }
+  await fbSet('pins', state.pins);
+  const sampleItems = [
+    {name:'Buckeye Brownie Bar',category:'Bars',stock:{},target:6,frozen:{},notes:''},
+    {name:'Lemon Cheesecake Bar',category:'Bars',stock:{},target:6,frozen:{},notes:''},
+    {name:"Millionaire's Shortbread Bar",category:'Bars',stock:{},target:6,frozen:{},notes:''},
+    {name:'Cookie Dough Brownie',category:'Brownies',stock:{},target:8,frozen:{},notes:''},
+    {name:'Salted Caramel Brownie',category:'Brownies',stock:{},target:8,frozen:{},notes:''},
+    {name:'Biscoff CBC',category:'Cake Slices',stock:{},target:8,frozen:{},notes:''},
+    {name:'Chocolate Chip Cookie Dough CBC',category:'Cake Slices',stock:{},target:8,frozen:{},notes:''},
+    {name:'Chocolate Fudge Cake',category:'Cake Slices',stock:{},target:10,frozen:{},notes:''},
+    {name:'Chocolate Mousse Cake',category:'Cake Slices',stock:{},target:10,frozen:{},notes:''},
+    {name:'Cinnabon Cake',category:'Cake Slices',stock:{},target:8,frozen:{},notes:''},
+    {name:'Flourless Chocolate Cake',category:'Cake Slices',stock:{},target:6,frozen:{},notes:''},
+    {name:'Hostess Cake',category:'Cake Slices',stock:{},target:8,frozen:{},notes:''},
+    {name:'Oreo CBC',category:'Cake Slices',stock:{},target:8,frozen:{},notes:''},
+    {name:'Oreo Mousse Cake',category:'Cake Slices',stock:{},target:10,frozen:{},notes:''},
+    {name:'Party Animal CBC',category:'Cake Slices',stock:{},target:8,frozen:{},notes:''},
+    {name:'Red Velvet Cake',category:'Cake Slices',stock:{},target:10,frozen:{},notes:''},
+    {name:'Andes Mint',category:'Cookies',stock:{},target:12,frozen:{},notes:''},
+    {name:'Apple Caramel Crisp',category:'Cookies',stock:{},target:12,frozen:{},notes:''},
+    {name:'Brookie',category:'Cookies',stock:{},target:12,frozen:{},notes:''},
+    {name:'Butterfinger',category:'Cookies',stock:{},target:12,frozen:{},notes:''},
+    {name:'Chocolate Chunk',category:'Cookies',stock:{},target:12,frozen:{},notes:''},
+    {name:'Dumpster Fire',category:'Cookies',stock:{},target:12,frozen:{},notes:''},
+    {name:'Nutella Smash',category:'Cookies',stock:{},target:12,frozen:{},notes:''},
+    {name:'Oatmeal Scotchy',category:'Cookies',stock:{},target:12,frozen:{},notes:''},
+    {name:'Oreo Explosion',category:'Cookies',stock:{},target:12,frozen:{},notes:''},
+    {name:'Party Animal',category:'Cookies',stock:{},target:12,frozen:{},notes:''},
+    {name:'Peanut Butter Cup',category:'Cookies',stock:{},target:12,frozen:{},notes:''},
+    {name:'Penthouse',category:'Cookies',stock:{},target:12,frozen:{},notes:''},
+    {name:'Red Velvet',category:'Cookies',stock:{},target:12,frozen:{},notes:''},
+    {name:'Salted Caramel',category:'Cookies',stock:{},target:12,frozen:{},notes:''},
+    {name:'Slim Shady (M&M)',category:'Cookies',stock:{},target:12,frozen:{},notes:''},
+    {name:'Snickerdoodle',category:'Cookies',stock:{},target:12,frozen:{},notes:''},
+    {name:'White Chocolate Macadamia Nut',category:'Cookies',stock:{},target:12,frozen:{},notes:''},
+    {name:'Apple Turnover',category:'Frozen Items',stock:{},target:8,frozen:{},notes:''},
+    {name:'Blueberry Scone',category:'Frozen Items',stock:{},target:8,frozen:{},notes:''},
+    {name:'Cherry Turnover',category:'Frozen Items',stock:{},target:8,frozen:{},notes:''},
+    {name:'French Macaron',category:'Frozen Items',stock:{},target:12,frozen:{},notes:''},
+    {name:'Raspberry Turnover',category:'Frozen Items',stock:{},target:8,frozen:{},notes:''},
+    {name:'Chocolate Chunk T&B',category:'Frozen Take & Bake',stock:{},target:10,frozen:{},notes:''},
+    {name:'Gluten Free Chocolate Chip T&B',category:'Frozen Take & Bake',stock:{},target:8,frozen:{},notes:''},
+    {name:'Gluten Free Snickerdoodle T&B',category:'Frozen Take & Bake',stock:{},target:8,frozen:{},notes:''},
+    {name:"M&M's T&B",category:'Frozen Take & Bake',stock:{},target:10,frozen:{},notes:''},
+    {name:'Peanut Butter T&B',category:'Frozen Take & Bake',stock:{},target:10,frozen:{},notes:''},
+    {name:'Red Velvet T&B',category:'Frozen Take & Bake',stock:{},target:10,frozen:{},notes:''},
+    {name:'Salted Caramel T&B',category:'Frozen Take & Bake',stock:{},target:10,frozen:{},notes:''},
+    {name:'Snickerdoodle T&B',category:'Frozen Take & Bake',stock:{},target:10,frozen:{},notes:''},
+    {name:'Carrot Cake Mini',category:'Mini Cakes',stock:{},target:6,frozen:{},notes:''},
+    {name:'Chocolate Mini Cake',category:'Mini Cakes',stock:{},target:6,frozen:{},notes:''},
+    {name:'Chocolate Peanut Butter Mini Cake',category:'Mini Cakes',stock:{},target:6,frozen:{},notes:''},
+    {name:'Red Velvet Mini Cake',category:'Mini Cakes',stock:{},target:6,frozen:{},notes:''},
+    {name:'Vanilla Mini Cake',category:'Mini Cakes',stock:{},target:6,frozen:{},notes:''},
+    {name:'Cheesecake',category:'Other',stock:{},target:6,frozen:{},notes:''},
+    {name:'Cookie Cake',category:'Other',stock:{},target:6,frozen:{},notes:''},
+  ];
+  for (const it of sampleItems) { const id = await fbPush('items', it); state.items.push({id,...it}); }
+}
+
+// ── INIT ──────────────────────────────────────────────────
+window.onload = async () => {
+  // Show login immediately with default locations
+  state.locations = [{id:'cedarburg',name:'Cedarburg',type:'both'},{id:'mequon',name:'Mequon',type:'retail'}];
+  buildLoginLocationSelect();
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('login-screen').classList.add('active');
+  
+  // Load real data in background
+  loadAll().then(() => {
+    buildLoginLocationSelect();
+  }).catch(e => console.error('Background load error:', e));
+};
+
+function buildLoginLocationSelect() {
+  const sel = document.getElementById('login-location');
+  sel.innerHTML = state.locations.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
+}
+
+function doLogin() {
+  const role = document.getElementById('login-role').value;
+  const pin = document.getElementById('login-pin').value;
+  const locId = document.getElementById('login-location').value;
+  if (pin !== state.pins[role]) { document.getElementById('login-error').style.display = 'block'; return; }
+  document.getElementById('login-error').style.display = 'none';
+  const loc = state.locations.find(l => l.id === locId);
+  session = { role, locationId: locId, locationName: loc?.name || '' };
+  document.getElementById('login-screen').classList.remove('active');
+  document.getElementById('app-screen').classList.add('active');
+  setupApp();
+}
+
+function doLogout() {
+  session = { role:null, locationId:null, locationName:null };
+  document.getElementById('login-pin').value = '';
+  document.getElementById('app-screen').classList.remove('active');
+  document.getElementById('login-screen').classList.add('active');
+  buildLoginLocationSelect();
+}
+
+function setupApp() {
+  const rb = document.getElementById('topbar-role-badge');
+  rb.textContent = session.role.charAt(0).toUpperCase() + session.role.slice(1);
+  rb.className = 'role-badge role-' + session.role;
+  document.getElementById('topbar-loc-name').textContent = session.locationName;
+  document.getElementById('nav-settings').style.display = session.role === 'owner' ? '' : 'none';
+  showPage('overview', document.getElementById('nav-overview'));
+  scheduleMorningEmail();
+  checkLowIngredientAlert();
+  pollData();
+}
+
+// ── PAGES ──────────────────────────────────────────────────
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if (el) el.classList.add('active');
+  if (name === 'overview') renderOverview();
+  if (name === 'chat') renderChat();
+  if (name === 'delivery') renderDelivery();
+  if (name === 'shopping') renderShopping();
+  if (name === 'settings') renderSettings();
+}
+
+// ── OVERVIEW ──────────────────────────────────────────────
+function renderOverview() { renderStats(); renderNeeds(); renderDemandGraphs(); }
+
+function getItemStock(item, locId) { return (item.stock && item.stock[locId]) || 0; }
+function getItemFrozen(item, locId) { return (item.frozen && item.frozen[locId]) || 0; }
+function getTotalStock(item) { let t=0; state.locations.forEach(l=>t+=getItemStock(item,l.id)+getItemFrozen(item,l.id)); return t; }
+function getItemTarget(item) { return item.target || 0; }
+
+function renderAlerts() {
+  const c = document.getElementById('alerts-container');
+  let html = '';
+  state.items.forEach(it => {
+    const total = getTotalStock(it), target = getItemTarget(it);
+    if (total===0 && target>0) html += alertHtml('red', `${it.name} is completely out of stock.`);
+    else if (total < target*0.3 && target>0) html += alertHtml('red', `${it.name} critically low — ${total} available, need ${target}.`);
+    else if (total < target*0.6 && target>0) html += alertHtml('amber', `${it.name} running low — ${total} of ${target} target.`);
+  });
+  const pendingDelivery = deliveryItems.filter(d => !d.checked).length;
+  if (pendingDelivery > 0) html += alertHtml('teal', `${pendingDelivery} item${pendingDelivery>1?'s':''} pending delivery.`);
+  const pendingShopping = shoppingListItems.filter(s => !s.checked).length;
+  if (pendingShopping > 0) html += alertHtml('teal', `${pendingShopping} ingredient${pendingShopping>1?'s':''} on the shopping list.`);
+  c.innerHTML = html;
+}
+
+function alertHtml(type, msg) {
+  const icons = {
+    red: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+    amber: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+    teal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
+  };
+  return `<div class="alert alert-${type}">${icons[type]}<span>${msg}</span></div>`;
+}
+
+function renderStats() {
+  const grid = document.getElementById('stat-grid');
+  const lowItems = state.items.filter(it => getTotalStock(it) < getItemTarget(it)*0.6 && getItemTarget(it)>0).length;
+  const pendingDel = deliveryItems.filter(d => !d.checked).length;
+  const pendingShop = shoppingListItems.filter(s => !s.checked).length;
+  const totalStock = state.items.reduce((a,it) => a+getTotalStock(it), 0);
+  grid.innerHTML = `
+    <div class="stat-card"><div class="stat-label">Total stock (doz)</div><div class="stat-val">${totalStock}</div></div>
+    <div class="stat-card"><div class="stat-label">Items low</div><div class="stat-val ${lowItems>0?'warn':''}">${lowItems}</div></div>
+    <div class="stat-card"><div class="stat-label">Pending delivery</div><div class="stat-val ${pendingDel>0?'warn':''}">${pendingDel}</div></div>
+    <div class="stat-card"><div class="stat-label">Shopping list</div><div class="stat-val ${pendingShop>0?'warn':''}">${pendingShop}</div></div>`;
+}
+
+function renderNeeds() {
+  const list = document.getElementById('needs-list');
+  if (!state.items.length) { list.innerHTML = '<div class="empty-state"><p>No items yet</p></div>'; return; }
+  const sorted = [...state.items].sort((a,b) => Math.max(0,getItemTarget(b)-getTotalStock(b)) - Math.max(0,getItemTarget(a)-getTotalStock(a)));
+  list.innerHTML = sorted.map(it => {
+    const total = getTotalStock(it), target = getItemTarget(it), needed = Math.max(0,target-total);
+    const frozen = state.locations.reduce((a,l) => a+getItemFrozen(it,l.id), 0);
+    let chip = needed===0 ? 'On target' : `Need ${needed} doz`;
+    let chipClass = needed===0 ? 'need-ok' : needed>=target*0.7 ? 'need-high' : 'need-med';
+    return `<div class="list-row">
+      <div style="flex:1">
+        <div class="row-name">${it.name}</div>
+        <div class="row-sub">${total} doz fresh${frozen>0?' · '+frozen+' frozen':''}${target?' · target: '+target:''}</div>
+      </div>
+      <span class="need-chip ${chipClass}">${chip}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── DEMAND GRAPHS ─────────────────────────────────────────
+function getWeekAgo() { const d=new Date(); d.setDate(d.getDate()-7); return d.getTime(); }
+function getMonthAgo() { const d=new Date(); d.setDate(d.getDate()-30); return d.getTime(); }
+
+async function renderDemandGraphs() {
+  const pp = document.getElementById('graph-period-pills');
+  if (pp) pp.innerHTML = [['week','This week'],['month','This month']].map(([v,l]) =>
+    `<div class="filter-pill ${graphPeriod===v?'active':''}" onclick="graphPeriod='${v}';renderDemandGraphs()" style="font-size:11px;padding:4px 10px">${l}</div>`).join('');
+  const cp = document.getElementById('graph-cat-pills');
+  if (cp) cp.innerHTML = PRODUCT_CATEGORIES.map(c =>
+    `<div class="filter-pill ${graphCategory===c?'active':''}" onclick="graphCategory='${c}';renderDemandGraphs()" style="font-size:11px;padding:4px 10px">${c}</div>`).join('');
+
+  const cutoff = graphPeriod==='week' ? getWeekAgo() : getMonthAgo();
+  const filtered = deliveryItems.filter(d => (d.ts||0) >= cutoff);
+  const catItems = state.items.filter(it => it.category === graphCategory);
+  const counts = {};
+  catItems.forEach(it => { counts[it.name] = 0; });
+  filtered.forEach(d => {
+    const match = catItems.find(it => {
+      const dname = (d.itemName||'').toLowerCase();
+      return it.name.toLowerCase().split(' ').some(w => w.length>2 && dname.includes(w));
+    });
+    if (match) counts[match.name] = (counts[match.name]||0) + (parseInt(d.qty)||1);
+  });
+  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).filter(([,v])=>v>0);
+  const canvas = document.getElementById('demand-chart');
+  const empty = document.getElementById('chart-empty');
+  if (!sorted.length) {
+    if (canvas) canvas.style.display='none';
+    if (empty) empty.style.display='block';
+    renderInsights([], graphCategory); return;
+  }
+  if (canvas) canvas.style.display='block';
+  if (empty) empty.style.display='none';
+  const colors = ['#2C1A0E','#6B3F1F','#C4926A','#2A7C6F','#D4860A','#B83232','#2E7D4F','#7B5EA7'];
+  if (demandChart) { demandChart.destroy(); demandChart=null; }
+  demandChart = new Chart(canvas.getContext('2d'), {
+    type:'bar',
+    data:{ labels:sorted.map(([n])=>n.length>14?n.substring(0,12)+'…':n), datasets:[{data:sorted.map(([,v])=>v), backgroundColor:sorted.map((_,i)=>colors[i%colors.length]+'CC'), borderColor:sorted.map((_,i)=>colors[i%colors.length]), borderWidth:1, borderRadius:6}] },
+    options:{ responsive:true, plugins:{legend:{display:false}}, scales:{ x:{ticks:{font:{size:10},color:'#7A5C46'},grid:{display:false}}, y:{ticks:{font:{size:10},color:'#7A5C46',stepSize:1},grid:{color:'#E8DDD3'},beginAtZero:true} } }
+  });
+  renderInsights(sorted, graphCategory);
+}
+
+function renderInsights(sorted, category) {
+  const card = document.getElementById('insights-card');
+  if (!card) return;
+  if (!sorted.length) { card.innerHTML = `<div style="font-size:13px;color:var(--text-secondary);line-height:1.5">💡 No demand data yet for <strong>${category}</strong> this ${graphPeriod}. Log delivery requests in the Chat tab to see insights.</div>`; return; }
+  const top=sorted[0], second=sorted[1], total=sorted.reduce((a,[,v])=>a+v,0), topPct=Math.round(top[1]/total*100);
+  const insights = [
+    `🏆 <strong>${top[0]}</strong> is your most requested ${category.toLowerCase().replace(/s$/,'')} with ${top[1]} units — keep extra stock on hand.`,
+    second ? `📊 <strong>${top[0]}</strong> accounts for ${topPct}% of all ${category} demand${second?`, followed by <strong>${second[0]}</strong>`:''}` : null,
+    sorted.filter(([,v])=>v===1).length>0 ? `⚠️ <strong>${sorted.filter(([,v])=>v===1).slice(0,2).map(([n])=>n).join(', ')}</strong> has very low demand — consider reviewing.` : null,
+    sorted.length>=3 ? `📦 Focus on your top 3: <strong>${sorted.slice(0,3).map(([n])=>n).join(', ')}</strong>` : null
+  ].filter(Boolean);
+  card.innerHTML = insights.map(i=>`<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text-secondary);line-height:1.5">${i}</div>`).join('');
+}
+
+// ── CHAT ──────────────────────────────────────────────────
+function renderChat() {
+  const c = document.getElementById('chat-messages');
+  if (!c) return;
+  if (!chatMessages.length) {
+    c.innerHTML = `<div style="text-align:center;padding:3rem 1rem;color:var(--text-muted)">
+      <div style="font-size:36px;margin-bottom:12px">💬</div>
+      <div style="font-size:14px;font-weight:500;margin-bottom:8px">Team Chat</div>
+      <div style="font-size:13px;line-height:1.6">Try saying:<br><em>"Mequon needs 3 Oreos"</em><br><em>"Cedarburg needs 5 Chocolate Chunk"</em><br><em>"Need 2 boxes of butter from Costco"</em></div>
+    </div>`; return;
+  }
+  c.innerHTML = chatMessages.slice(-30).map(msg => {
+    const isMe = msg.author === session.role+'-'+session.locationId;
+    const align = isMe ? 'flex-end' : 'flex-start';
+    const bg = isMe ? 'var(--brown-dark)' : 'var(--warm-white)';
+    const color = isMe ? 'var(--cream)' : 'var(--text-primary)';
+    const time = msg.ts ? new Date(msg.ts).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}) : '';
+    const tag = msg.routed ? `<span style="font-size:11px;background:var(--teal-light);color:var(--teal);border-radius:10px;padding:2px 8px;margin-top:3px;display:inline-block">→ ${msg.routed}</span>` : '';
+    return `<div style="display:flex;flex-direction:column;align-items:${align};gap:2px">
+      <div style="font-size:10px;color:var(--text-muted);padding:0 8px">${msg.authorName||''} · ${time}</div>
+      <div style="max-width:85%;background:${bg};color:${color};border:1px solid var(--border);border-radius:16px;padding:9px 13px;font-size:14px;line-height:1.4">${msg.text}</div>
+      ${tag}
+    </div>`;
+  }).join('');
+  c.scrollTop = c.scrollHeight;
+}
+
+async function sendChatMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = ''; input.style.height = 'auto';
+
+  const authorName = session.role.charAt(0).toUpperCase()+session.role.slice(1)+' · '+session.locationName;
+  const parsed = parseChatMessage(text);
+  const msg = { text, role:'user', author:session.role+'-'+session.locationId, authorName, routed:parsed.routed, ts:Date.now() };
+  const id = await fbPush('teamChat', msg);
+  chatMessages.push({id,...msg});
+
+  // Route to delivery or shopping
+  if (parsed.type === 'delivery' && parsed.location && parsed.items.length) {
+    for (const item of parsed.items) {
+      const di = { itemName:item.name, qty:item.qty, location:parsed.location, checked:false, ts:Date.now() };
+      const did = await fbPush('deliveryList', di);
+      deliveryItems.push({id:did,...di});
+    }
+    updateDeliveryBadge();
+  } else if (parsed.type === 'shopping' && parsed.items.length) {
+    for (const item of parsed.items) {
+      const si = { name:item.name, qty:item.qty, unit:item.unit, supplier:item.supplier, checked:false, ts:Date.now() };
+      const sid = await fbPush('shoppingList', si);
+      shoppingListItems.push({id:sid,...si});
+    }
+    updateShoppingBadge();
+  }
+
+  renderChat();
+  renderStats();
+}
+
+function parseChatMessage(text) {
+  const lower = text.toLowerCase();
+
+  // Detect location
+  const mequonMatch = lower.includes('mequon');
+  const cedarburgMatch = lower.includes('cedarburg') || lower.includes('cedar');
+  const location = mequonMatch ? 'Mequon' : cedarburgMatch ? 'Cedarburg' : null;
+
+  // Detect supplier
+  const supplierMap = {'costco':'Costco','meijer':'Meijer','restaurant depot':'Restaurant Depot','depot':'Restaurant Depot',"gordon's":"Gordon's / Webstaurant",'gordons':"Gordon's / Webstaurant",'webstaurant':"Gordon's / Webstaurant",'amazon':'Amazon','valley':'Valley'};
+  let supplier = null;
+  for (const [kw, name] of Object.entries(supplierMap)) {
+    if (lower.includes(kw)) { supplier = name; break; }
+  }
+
+  // Is this a shopping message?
+  const isShoppingMsg = !location && (
+    supplier !== null ||
+    /\b(shopping|list|put|add|order|get|need|buy)\b/.test(lower) &&
+    !lower.includes('mequon') && !lower.includes('cedarburg')
+  );
+
+  // Clean text — remove noise words to get the actual item names
+  const noise = /\b(mequon|cedarburg|cedar|needs?|wants?|send|bring|deliver|get|put|add|on the list|shopping list|from|the|and|also|plus|with|some|please|me|us|costco|meijer|amazon|valley|restaurant depot|gordons|gordon|webstaurant)\b/gi;
+  const cleaned = lower.replace(noise, ' ').replace(/\s+/g, ' ').trim();
+
+  // Parse segments — split by comma or "and" to get individual item requests
+  // e.g. "3 oreo cookies, 2 chocolate chunk, 1 oatmeal scotchy"
+  const segments = cleaned.split(/,|\band\b/).map(s => s.trim()).filter(s => s.length > 1);
+
+  function findBestMatch(segment, itemList) {
+    // Extract quantity from segment
+    const qtyMatch = segment.match(/^(\d+)\s*/);
+    const segQty = qtyMatch ? parseInt(qtyMatch[1]) : 1;
+    const segWords = segment.replace(/^\d+\s*/, '')
+      .replace(/\b(boxes?|bags?|packs?|dozen|doz|gallons?|bottles?|cans?|rolls?|flats?|cookie|cookies|cake|cakes|brownie|brownies|bar|bars)\b/gi, '')
+      .trim()
+      .split(/\s+/)
+      .filter(w => w.length > 1);
+
+    if (!segWords.length) return null;
+
+    let bestItem = null;
+    let bestScore = 0;
+
+    itemList.forEach(item => {
+      const itemWords = item.name.toLowerCase()
+        .replace(/\b(cookie|cookies|cake|cakes|brownie|brownies|bar|bars|explosion|smash|chunk|cup|crisp|scotchy|mint|animal|fire|penthouse)\b/gi, w => w)
+        .split(/\s+/)
+        .filter(w => w.length > 1);
+
+      let score = 0;
+      let matchedSegWords = 0;
+
+      for (const sw of segWords) {
+        for (const iw of itemWords) {
+          if (iw === sw || iw.startsWith(sw) || sw.startsWith(iw)) {
+            score += sw.length; // longer word matches score higher
+            matchedSegWords++;
+            break;
+          }
+        }
+      }
+
+      if (matchedSegWords === 0) return;
+
+      // Penalize items with many unmatched words (too specific for what was said)
+      const unmatchedItem = itemWords.length - matchedSegWords;
+      score -= unmatchedItem * 0.5;
+
+      // Penalize if item contains words NOT in segment that are significant
+      // This prevents "peanut butter" matching when only "butter" was said
+      const itemSignificant = itemWords.filter(w =>
+        !['the','and','with','of','a'].includes(w)
+      );
+      const segSignificant = segWords;
+      const falseMatches = itemSignificant.filter(iw =>
+        !segSignificant.some(sw => iw.startsWith(sw) || sw.startsWith(iw))
+      ).length;
+      score -= falseMatches * 1.5; // heavy penalty for unspoken item words
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestItem = { item, qty: segQty };
+      }
+    });
+
+    return bestScore > 0 ? bestItem : null;
+  }
+
+  if (location) {
+    // Delivery routing
+    const matchedItems = [];
+    const usedIds = new Set();
+
+    for (const seg of segments) {
+      const result = findBestMatch(seg, state.items);
+      if (result && !usedIds.has(result.item.id)) {
+        usedIds.add(result.item.id);
+        matchedItems.push({ name: result.item.name, qty: result.qty });
+      }
+    }
+
+    // Fallback if nothing matched
+    if (!matchedItems.length) {
+      const fallback = cleaned.replace(/\d+/g, '').trim();
+      if (fallback.length > 1) matchedItems.push({ name: fallback, qty: 1 });
+    }
+
+    const routedStr = 'Delivery → ' + location + ' (' + matchedItems.map(i => i.qty + 'x ' + i.name).join(', ') + ')';
+    return { type: 'delivery', location, items: matchedItems, routed: routedStr };
+
+  } else if (isShoppingMsg) {
+    // Shopping routing
+    const matchedItems = [];
+    const usedIds = new Set();
+
+    for (const seg of segments) {
+      const result = findBestMatch(seg, state.ingredients);
+      if (result && !usedIds.has(result.item.id)) {
+        usedIds.add(result.item.id);
+        const sup = supplier || state.suppliers.find(s => s.id === result.item.supplierId)?.name || 'Unknown';
+        const unitMatch = seg.match(/\b(boxes?|bags?|packs?|dozen|doz|gallons?|bottles?|cans?|rolls?|flats?)\b/i);
+        matchedItems.push({
+          name: result.item.name,
+          qty: result.qty,
+          unit: unitMatch ? unitMatch[1] : result.item.unit || '',
+          supplier: sup
+        });
+      }
+    }
+
+    if (!matchedItems.length) {
+      const fallback = cleaned.replace(/\d+/g, '').trim();
+      if (fallback.length > 1) matchedItems.push({ name: fallback, qty: 1, unit: '', supplier: supplier || 'Unknown' });
+    }
+
+    const routedStr = 'Shopping list (' + matchedItems.map(i => i.name).join(', ') + ')';
+    return { type: 'shopping', items: matchedItems, routed: routedStr };
+  }
+
+  return { type: 'note', items: [], routed: null };
+}
+
+function extractQtyNearKeyword(text, keyword) {
+  const words = text.split(/[\s,]+/);
+  for (let i = 0; i < words.length; i++) {
+    if (words[i].includes(keyword) || keyword.includes(words[i])) {
+      for (let j = Math.max(0, i-3); j <= Math.min(words.length-1, i+3); j++) {
+        const num = parseInt(words[j]);
+        if (!isNaN(num) && num > 0 && num < 1000) return num;
+      }
+    }
+  }
+  return null;
+}
+
+// Extract quantity mentioned near a specific keyword in text
+function extractQtyNearKeyword(text, keyword) {
+  // Find the keyword position and look for a number within 3 words before or after
+  const words = text.split(/[\s,]+/);
+  for (let i = 0; i < words.length; i++) {
+    if (words[i].includes(keyword) || keyword.includes(words[i])) {
+      // Look 3 words before and after for a number
+      for (let j = Math.max(0, i-3); j <= Math.min(words.length-1, i+3); j++) {
+        const num = parseInt(words[j]);
+        if (!isNaN(num) && num > 0 && num < 1000) return num;
+      }
+    }
+  }
+  return null;
+}
+
+// ── DELIVERY ──────────────────────────────────────────────
+function renderDelivery() {
+  ['mequon','cedarburg'].forEach(loc => {
+    const locName = loc.charAt(0).toUpperCase()+loc.slice(1);
+    const items = deliveryItems.filter(d => !d.checked && d.location && d.location.toLowerCase() === loc);
+    const el = document.getElementById('delivery-'+loc);
+    const countEl = document.getElementById(loc+'-count');
+    if (countEl) countEl.textContent = items.length + ' item' + (items.length!==1?'s':'');
+    if (!el) return;
+    if (!items.length) { el.innerHTML = `<div style="font-size:13px;color:var(--text-muted);padding:8px 0;text-align:center">Nothing pending for ${locName}</div>`; return; }
+    el.innerHTML = items.map(item => `
+      <div onclick="toggleDeliveryItem('${item.id}')" id="ditem-${item.id}"
+        style="display:flex;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid var(--border);cursor:pointer;transition:all .2s">
+        <div style="width:24px;height:24px;border:2px solid var(--border);border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--warm-white)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="3" width="12" height="12"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:500;color:var(--text-primary)">${item.itemName||item.name||'Unknown'}</div>
+          ${item.qty && item.qty > 0 ? `<div style="font-size:12px;color:var(--text-muted)">Qty: ${item.qty}</div>` : ''}
+        </div>
+        <div style="font-size:11px;color:var(--text-muted)">${item.ts ? new Date(item.ts).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : ''}</div>
+      </div>`).join('');
+  });
+  updateDeliveryBadge();
+}
+
+async function toggleDeliveryItem(itemId) {
+  const item = deliveryItems.find(d => d.id === itemId);
+  if (!item) return;
+  item.checked = !item.checked;
+  await fbPatch(`deliveryList/${itemId}`, {checked: item.checked});
+  const el = document.getElementById('ditem-'+itemId);
+  if (el) {
+    if (item.checked) { el.style.opacity='0.35'; el.style.textDecoration='line-through'; }
+    else { el.style.opacity='1'; el.style.textDecoration='none'; }
+  }
+  setTimeout(() => renderDelivery(), 400);
+  updateDeliveryBadge();
+}
+
+function toggleDeliverySection(loc) {
+  deliverySectionState[loc] = !deliverySectionState[loc];
+  const el = document.getElementById('delivery-'+loc);
+  const icon = document.getElementById(loc+'-chevron');
+  if (el) el.style.display = deliverySectionState[loc] ? 'block' : 'none';
+  if (icon) icon.style.transform = deliverySectionState[loc] ? '' : 'rotate(-90deg)';
+}
+
+async function clearDelivered() {
+  const done = deliveryItems.filter(d => d.checked);
+  for (const d of done) { await fbDelete(`deliveryList/${d.id}`); }
+  deliveryItems = deliveryItems.filter(d => !d.checked);
+  renderDelivery();
+}
+
+function updateDeliveryBadge() {
+  const count = deliveryItems.filter(d => !d.checked).length;
+  const badge = document.getElementById('delivery-badge');
+  if (badge) { badge.textContent = count; badge.style.display = count > 0 ? 'block' : 'none'; }
+}
+
+// ── SHOPPING ──────────────────────────────────────────────
+function renderShopping() {
+  const unchecked = shoppingListItems.filter(i => !i.checked);
+  const suppliers = ['all', ...new Set(shoppingListItems.map(i=>i.supplier).filter(Boolean))];
+  const pillsEl = document.getElementById('shopping-supplier-pills');
+  if (pillsEl) pillsEl.innerHTML = suppliers.map(s =>
+    `<div class="filter-pill ${shoppingSupplierFilter===s?'active':''}" onclick="shoppingSupplierFilter='${s.replace(/'/g,"\'")}';renderShopping()">${s==='all'?'All stores':s}</div>`).join('');
+
+  const container = document.getElementById('shopping-checklist');
+  const emptyEl = document.getElementById('shopping-empty');
+
+  let filtered = unchecked;
+  if (shoppingSupplierFilter !== 'all') filtered = filtered.filter(i => i.supplier === shoppingSupplierFilter);
+
+  if (!filtered.length) {
+    if (container) container.innerHTML = '';
+    if (emptyEl) emptyEl.style.display = 'block';
+    return;
+  }
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  const bySupplier = {};
+  filtered.forEach(it => {
+    const sup = it.supplier || 'Unknown';
+    if (!bySupplier[sup]) bySupplier[sup] = [];
+    bySupplier[sup].push(it);
+  });
+
+  if (container) container.innerHTML = Object.entries(bySupplier).map(([sup, list]) => `
+    <div style="margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;color:var(--brown-mid);letter-spacing:.05em;text-transform:uppercase;padding-bottom:6px;border-bottom:2px solid var(--border);margin-bottom:4px">
+        ${sup} <span style="font-weight:400;color:var(--text-muted)">(${list.length})</span>
+      </div>
+      ${list.map(it => `
+        <div onclick="toggleShoppingItem('${it.id}')" id="sitem-${it.id}"
+          style="display:flex;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid var(--border);cursor:pointer;transition:all .2s">
+          <div style="width:24px;height:24px;border:2px solid var(--border);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--warm-white)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="3" width="12" height="12"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:500;color:var(--text-primary)">${it.name}</div>
+            ${it.qty && it.qty!=='?' ? `<div style="font-size:12px;color:var(--text-muted)">${it.qty} ${it.unit||''}</div>` : ''}
+          </div>
+        </div>`).join('')}
+    </div>`).join('');
+  updateShoppingBadge();
+}
+
+async function toggleShoppingItem(itemId) {
+  const item = shoppingListItems.find(i => i.id === itemId);
+  if (!item) return;
+  item.checked = !item.checked;
+  await fbPatch(`shoppingList/${itemId}`, {checked: item.checked});
+  const el = document.getElementById('sitem-'+itemId);
+  if (el) {
+    if (item.checked) { el.style.opacity='0.35'; el.style.textDecoration='line-through'; }
+    else { el.style.opacity='1'; el.style.textDecoration='none'; }
+  }
+  setTimeout(() => renderShopping(), 400);
+  updateShoppingBadge();
+}
+
+async function clearCheckedShopping() {
+  const done = shoppingListItems.filter(i => i.checked);
+  for (const d of done) { await fbDelete(`shoppingList/${d.id}`); }
+  shoppingListItems = shoppingListItems.filter(i => !i.checked);
+  renderShopping();
+}
+
+function updateShoppingBadge() {
+  const count = shoppingListItems.filter(i => !i.checked).length;
+  const badge = document.getElementById('shopping-badge');
+  if (badge) { badge.textContent = count; badge.style.display = count > 0 ? 'block' : 'none'; }
+}
+
+async function copyShoppingList() {
+  const unchecked = shoppingListItems.filter(i => !i.checked);
+  if (!unchecked.length) { alert('Shopping list is empty.'); return; }
+  const bySupplier = {};
+  unchecked.forEach(it => { const s=it.supplier||'Unknown'; if(!bySupplier[s])bySupplier[s]=[]; bySupplier[s].push(it); });
+  let text = 'LAKESIDE COOKIE CO — SHOPPING LIST\n' + new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}) + '\n\n';
+  Object.entries(bySupplier).forEach(([sup,list]) => {
+    text += sup.toUpperCase() + '\n';
+    list.forEach(it => { text += `  • ${it.name}${it.qty&&it.qty!=='?'?' — '+it.qty+' '+(it.unit||''):''}\n`; });
+    text += '\n';
+  });
+  try { await navigator.clipboard.writeText(text); alert('Copied to clipboard!'); }
+  catch(e) { alert('Could not copy — try selecting manually.'); }
+}
+
+// ── VOICE ─────────────────────────────────────────────────
+let activeRecognition = null;
+
+function startChatVoice() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+  const micBtn = document.getElementById('chat-mic-btn');
+  const transcriptBox = document.getElementById('voice-transcript');
+  const transcriptText = document.getElementById('transcript-text');
+
+  if (!SR) {
+    if (transcriptBox) { transcriptBox.style.display='block'; if(transcriptText) transcriptText.textContent='❌ Voice not supported — use Chrome on desktop or Android'; setTimeout(()=>{transcriptBox.style.display='none';},4000); }
+    return;
+  }
+
+  if (activeRecognition) { activeRecognition.stop(); activeRecognition=null; if(micBtn){micBtn.style.color='var(--text-muted)';} if(transcriptBox) transcriptBox.style.display='none'; return; }
+
+  navigator.mediaDevices.getUserMedia({audio:true}).then(() => {
+    const recognition = new SR();
+    activeRecognition = recognition;
+    recognition.lang = 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
+
+    if (micBtn) micBtn.style.color = 'var(--red)';
+    if (transcriptBox) { transcriptBox.style.display='block'; if(transcriptText) transcriptText.textContent='Speak now...'; }
+
+    recognition.onresult = (e) => {
+      let interim = '', final = '';
+      for (let i=e.resultIndex; i<e.results.length; i++) {
+        if (e.results[i].isFinal) final += e.results[i][0].transcript;
+        else interim += e.results[i][0].transcript;
+      }
+      if (transcriptText) transcriptText.textContent = final || interim || 'Speak now...';
+      if (final) {
+        const input = document.getElementById('chat-input');
+        if (input) { input.value = final; input.style.height='auto'; input.style.height=input.scrollHeight+'px'; }
+      }
+    };
+
+    recognition.onend = () => {
+      activeRecognition = null;
+      if (micBtn) micBtn.style.color='var(--text-muted)';
+      const finalText = transcriptText ? transcriptText.textContent : '';
+      if (finalText && finalText !== 'Speak now...' && finalText !== '❌ Voice not supported — use Chrome on desktop or Android') {
+        setTimeout(() => { sendChatMessage(); if(transcriptBox) transcriptBox.style.display='none'; }, 300);
+      } else {
+        setTimeout(() => { if(transcriptBox) transcriptBox.style.display='none'; }, 2000);
+      }
+    };
+
+    recognition.onerror = (e) => {
+      activeRecognition = null;
+      if (micBtn) micBtn.style.color='var(--text-muted)';
+      let msg = 'Error: '+e.error;
+      if (e.error==='not-allowed') msg='❌ Mic blocked — click the 🔒 icon in your address bar and allow microphone';
+      if (e.error==='no-speech') msg='❓ No speech detected — try again';
+      if (e.error==='network') msg='❌ Network error';
+      if (transcriptText) transcriptText.textContent = msg;
+      setTimeout(() => { if(transcriptBox) transcriptBox.style.display='none'; }, 4000);
+    };
+
+    try { recognition.start(); }
+    catch(err) {
+      activeRecognition=null;
+      if(micBtn) micBtn.style.color='var(--text-muted)';
+      if(transcriptText) transcriptText.textContent='❌ '+err.message;
+      setTimeout(()=>{ if(transcriptBox) transcriptBox.style.display='none'; },3000);
+    }
+  }).catch(() => {
+    if(transcriptBox){ transcriptBox.style.display='block'; if(transcriptText) transcriptText.textContent='❌ Mic permission denied — click 🔒 in address bar → allow microphone'; setTimeout(()=>{transcriptBox.style.display='none';},5000); }
+  });
+}
+
+// ── SETTINGS ──────────────────────────────────────────────
+function renderSettings() {
+  const lc = document.getElementById('settings-locations');
+  if(lc) lc.innerHTML = state.locations.map(l => `<div class="list-row">
+    <div style="flex:1"><div class="row-name">${l.name}</div><div class="row-sub">${l.type==='both'?'Bakery + Retail':l.type==='production'?'Production/Kitchen':'Retail only'}</div></div>
+    <button class="qty-btn" onclick="openEditLocation('${l.id}')" style="font-size:13px">✏️</button>
+    <button class="qty-btn" onclick="deleteLocation('${l.id}')" style="font-size:13px;color:var(--red)">✕</button>
+  </div>`).join('');
+  const sc = document.getElementById('settings-suppliers');
+  if(sc) sc.innerHTML = state.suppliers.map(s => `<div class="list-row">
+    <span class="row-name">${s.name}</span>
+    <button class="qty-btn" onclick="deleteSupplier('${s.id}')" style="font-size:13px;color:var(--red)">✕</button>
+  </div>`).join('') || '<div style="font-size:13px;color:var(--text-muted);padding:8px 0">No suppliers</div>';
+  const po=document.getElementById('pin-owner-display'), pb=document.getElementById('pin-baker-display'), pc=document.getElementById('pin-cashier-display');
+  if(po) po.textContent=state.pins.owner; if(pb) pb.textContent=state.pins.baker; if(pc) pc.textContent=state.pins.cashier;
+}
+
+// ── MODALS ────────────────────────────────────────────────
+function openModal(html) { document.getElementById('modal-content').innerHTML=`<div class="modal-handle"></div>${html}`; document.getElementById('modal-overlay').classList.add('open'); }
+function closeModal(e) { if(e&&e.target!==document.getElementById('modal-overlay'))return; document.getElementById('modal-overlay').classList.remove('open'); }
+function closeModalDirect() { document.getElementById('modal-overlay').classList.remove('open'); }
+
+function openAddLocation() {
+  openModal(`<div class="modal-title">Add location</div>
+    <div class="field-group"><div class="field-label">NAME</div><input type="text" id="m-name" placeholder="e.g. Port Washington"></div>
+    <div class="field-group"><div class="field-label">TYPE</div><select id="m-type">
+      <option value="retail">Retail only</option><option value="both">Bakery + Retail</option><option value="production">Production/Kitchen only</option>
+    </select></div>
+    <div class="modal-actions"><button class="btn btn-outline" onclick="closeModalDirect()">Cancel</button><button class="btn btn-primary" onclick="saveAddLocation()">Add</button></div>`);
+}
+async function saveAddLocation() {
+  const name=document.getElementById('m-name').value.trim(), type=document.getElementById('m-type').value;
+  if(!name){alert('Enter a name.');return;}
+  const id=await fbPush('locations',{name,type}); state.locations.push({id,name,type}); closeModalDirect(); renderSettings();
+}
+function openEditLocation(locId) {
+  const loc=state.locations.find(l=>l.id===locId); if(!loc)return;
+  openModal(`<div class="modal-title">Edit ${loc.name}</div>
+    <div class="field-group"><div class="field-label">NAME</div><input type="text" id="m-name" value="${loc.name}"></div>
+    <div class="field-group"><div class="field-label">TYPE</div><select id="m-type">
+      <option value="retail" ${loc.type==='retail'?'selected':''}>Retail only</option>
+      <option value="both" ${loc.type==='both'?'selected':''}>Bakery + Retail</option>
+      <option value="production" ${loc.type==='production'?'selected':''}>Production/Kitchen only</option>
+    </select></div>
+    <div class="modal-actions"><button class="btn btn-outline" onclick="closeModalDirect()">Cancel</button><button class="btn btn-primary" onclick="saveEditLocation('${locId}')">Save</button></div>`);
+}
+async function saveEditLocation(locId) {
+  const loc=state.locations.find(l=>l.id===locId); if(!loc)return;
+  loc.name=document.getElementById('m-name').value.trim(); loc.type=document.getElementById('m-type').value;
+  await fbPatch(`locations/${locId}`,{name:loc.name,type:loc.type}); closeModalDirect(); renderSettings();
+}
+async function deleteLocation(locId) {
+  if(!confirm('Delete this location?'))return; await fbDelete(`locations/${locId}`); state.locations=state.locations.filter(l=>l.id!==locId); renderSettings();
+}
+function openAddSupplier() {
+  openModal(`<div class="modal-title">Add supplier</div>
+    <div class="field-group"><div class="field-label">NAME</div><input type="text" id="m-name" placeholder="e.g. Gordon Food Service"></div>
+    <div class="modal-actions"><button class="btn btn-outline" onclick="closeModalDirect()">Cancel</button><button class="btn btn-primary" onclick="saveAddSupplier()">Add</button></div>`);
+}
+async function saveAddSupplier() {
+  const name=document.getElementById('m-name').value.trim(); if(!name){alert('Enter a name.');return;}
+  const id=await fbPush('suppliers',{name}); state.suppliers.push({id,name}); closeModalDirect(); renderSettings();
+}
+async function deleteSupplier(supId) {
+  if(!confirm('Delete this supplier?'))return; await fbDelete(`suppliers/${supId}`); state.suppliers=state.suppliers.filter(s=>s.id!==supId); renderSettings();
+}
+function openChangePins() {
+  openModal(`<div class="modal-title">Change PINs</div>
+    <div class="field-group"><div class="field-label">OWNER PIN</div><input type="password" id="m-pin-owner" value="${state.pins.owner}" inputmode="numeric" maxlength="6"></div>
+    <div class="field-group"><div class="field-label">BAKER PIN</div><input type="password" id="m-pin-baker" value="${state.pins.baker}" inputmode="numeric" maxlength="6"></div>
+    <div class="field-group"><div class="field-label">CASHIER PIN</div><input type="password" id="m-pin-cashier" value="${state.pins.cashier}" inputmode="numeric" maxlength="6"></div>
+    <div class="modal-actions"><button class="btn btn-outline" onclick="closeModalDirect()">Cancel</button><button class="btn btn-primary" onclick="savePins()">Save</button></div>`);
+}
+async function savePins() {
+  state.pins.owner=document.getElementById('m-pin-owner').value||state.pins.owner;
+  state.pins.baker=document.getElementById('m-pin-baker').value||state.pins.baker;
+  state.pins.cashier=document.getElementById('m-pin-cashier').value||state.pins.cashier;
+  await fbSet('pins',state.pins); closeModalDirect(); renderSettings();
+}
+
+// ── EMAIL ─────────────────────────────────────────────────
+function initEmailJS() { if(typeof emailjs!=='undefined'){emailjs.init(EJS_KEY);emailJsReady=true;} }
+async function sendEmail(subject, body) {
+  if(!emailJsReady)initEmailJS(); if(!emailJsReady)return;
+  try { await emailjs.send(EJS_SERVICE,EJS_TEMPLATE,{message:subject+'\n\n'+body,to_email:OWNER_EMAIL}); } catch(e){console.error('Email error',e);}
+}
+async function sendMorningEmail() {
+  let body='LAKESIDE COOKIE CO — MORNING SUMMARY\n'+new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})+'\n\n';
+  const pendingDel = deliveryItems.filter(d=>!d.checked);
+  if(pendingDel.length){
+    body+='PENDING DELIVERIES:\n';
+    ['Mequon','Cedarburg'].forEach(loc=>{
+      const items=pendingDel.filter(d=>d.location===loc);
+      if(items.length){body+=loc+':\n'; items.forEach(i=>{body+=`  • ${i.itemName||i.name} (qty: ${i.qty||'?'})\n`;}); }
+    });
+    body+='\n';
+  }
+  const pendingShop=shoppingListItems.filter(s=>!s.checked);
+  if(pendingShop.length){
+    body+='SHOPPING LIST:\n';
+    const byS={};
+    pendingShop.forEach(i=>{const s=i.supplier||'Unknown';if(!byS[s])byS[s]=[];byS[s].push(i);});
+    Object.entries(byS).forEach(([s,list])=>{body+=s+':\n';list.forEach(i=>{body+='  - '+i.name+(i.qty&&i.qty!=='?'?' ('+i.qty+' '+(i.unit||'')+')':'')+' \n';});});
+  }
+  await sendEmail('Lakeside Cookie Co — Morning Summary', body);
+}
+async function checkLowIngredientAlert() {
+  const low=state.ingredients.filter(i=>(i.qty||0)<(i.min||0));
+  if(low.length>=10){
+    let body=`You have ${low.length} ingredients below reorder level:\n\n`;
+    const byS={};
+    low.forEach(i=>{const s=state.suppliers.find(x=>x.id===i.supplierId)?.name||'Unknown';if(!byS[s])byS[s]=[];byS[s].push(i);});
+    Object.entries(byS).forEach(([s,list])=>{body+=s+':\n';list.forEach(i=>{body+=`  • ${i.name} — ${i.qty} ${i.unit} left\n`;});body+='\n';});
+    await sendEmail('⚠️ Lakeside — Low Ingredient Alert', body);
+  }
+}
+function scheduleMorningEmail() {
+  const now=new Date(), next7=new Date(); next7.setHours(7,0,0,0);
+  if(now>=next7) next7.setDate(next7.getDate()+1);
+  setTimeout(async()=>{ await sendMorningEmail(); setInterval(sendMorningEmail,24*60*60*1000); }, next7-now);
+}
+
+// ── INGREDIENT RESET ──────────────────────────────────────
+async function seedIngredientsIfEmpty() {
+  if(state.ingredients.length>0)return;
+  const supplierMap={};
+  state.suppliers.forEach(s=>{supplierMap[s.name]=s.id;});
+  const extra=["Restaurant Depot","Gordon's / Webstaurant"];
+  for(const name of extra){if(!supplierMap[name]){const id=await fbPush('suppliers',{name});supplierMap[name]=id;state.suppliers.push({id,name});}}
+  const SEED=[
+    {name:'Flour',category:'Dry Goods',unit:'bags',qty:0,min:2,supplier:'Costco'},
+    {name:'Sugar',category:'Dry Goods',unit:'bags',qty:0,min:1,supplier:'Costco'},
+    {name:'Powdered sugar',category:'Dry Goods',unit:'bags',qty:0,min:1,supplier:'Costco'},
+    {name:'Oats',category:'Dry Goods',unit:'bags',qty:0,min:1,supplier:'Costco'},
+    {name:'Baking soda',category:'Dry Goods',unit:'containers',qty:0,min:1,supplier:'Costco'},
+    {name:'Cinnamon',category:'Dry Goods',unit:'containers',qty:0,min:1,supplier:'Costco'},
+    {name:'Graham crackers',category:'Dry Goods',unit:'boxes',qty:0,min:1,supplier:'Costco'},
+    {name:'Animal crackers',category:'Dry Goods',unit:'bags',qty:0,min:1,supplier:'Costco'},
+    {name:'Biscoff cookies',category:'Dry Goods',unit:'bags',qty:0,min:1,supplier:'Costco'},
+    {name:'Semi sweet chocolate chips',category:'Baking',unit:'bags',qty:0,min:1,supplier:'Costco'},
+    {name:'Corn syrup',category:'Baking',unit:'bottles',qty:0,min:1,supplier:'Costco'},
+    {name:'Honey',category:'Baking',unit:'bottles',qty:0,min:1,supplier:'Costco'},
+    {name:'Pumpkin puree',category:'Baking',unit:'cans',qty:0,min:1,supplier:'Costco'},
+    {name:'Sweetened condensed milk',category:'Baking',unit:'cans',qty:0,min:2,supplier:'Costco'},
+    {name:'PB powder',category:'Baking',unit:'containers',qty:0,min:1,supplier:'Costco'},
+    {name:'Peanut butter',category:'Baking',unit:'jars',qty:0,min:1,supplier:'Costco'},
+    {name:'Pecans',category:'Nuts & Mix-ins',unit:'bags',qty:0,min:1,supplier:'Costco'},
+    {name:'Macadamia nuts',category:'Nuts & Mix-ins',unit:'bags',qty:0,min:1,supplier:'Costco'},
+    {name:'Blueberries',category:'Produce',unit:'containers',qty:0,min:1,supplier:'Costco'},
+    {name:'Lemons',category:'Produce',unit:'bags',qty:0,min:1,supplier:'Costco'},
+    {name:'Carrots',category:'Produce',unit:'bags',qty:0,min:1,supplier:'Costco'},
+    {name:'Cream cheese',category:'Dairy',unit:'packs',qty:0,min:2,supplier:'Costco'},
+    {name:'Butter',category:'Dairy',unit:'boxes',qty:0,min:2,supplier:'Costco'},
+    {name:'Eggs',category:'Dairy',unit:'flats',qty:0,min:1,supplier:'Costco'},
+    {name:'Egg whites',category:'Dairy',unit:'cartons',qty:0,min:1,supplier:'Costco'},
+    {name:'Whole milk',category:'Dairy',unit:'gallons',qty:0,min:1,supplier:'Costco'},
+    {name:'Skim milk',category:'Dairy',unit:'gallons',qty:0,min:1,supplier:'Costco'},
+    {name:'2% milk',category:'Dairy',unit:'gallons',qty:0,min:1,supplier:'Costco'},
+    {name:'Heavy cream',category:'Dairy',unit:'cartons',qty:0,min:1,supplier:'Costco'},
+    {name:'Almond milk',category:'Dairy',unit:'cartons',qty:0,min:1,supplier:'Costco'},
+    {name:'Oat milk',category:'Dairy',unit:'cartons',qty:0,min:1,supplier:'Costco'},
+    {name:'Redi whip',category:'Dairy',unit:'cans',qty:0,min:1,supplier:'Costco'},
+    {name:'Vegetable oil',category:'Oils & Liquids',unit:'bottles',qty:0,min:1,supplier:'Costco'},
+    {name:'Apple cider',category:'Oils & Liquids',unit:'jugs',qty:0,min:1,supplier:'Costco'},
+    {name:'Ice Mountain water',category:'Beverages',unit:'cases',qty:0,min:1,supplier:'Costco'},
+    {name:'Pellegrino',category:'Beverages',unit:'cases',qty:0,min:1,supplier:'Costco'},
+    {name:'Lemonade',category:'Beverages',unit:'bottles',qty:0,min:1,supplier:'Costco'},
+    {name:'Pink salt',category:'Spices',unit:'containers',qty:0,min:1,supplier:'Costco'},
+    {name:'Sea salt',category:'Spices',unit:'containers',qty:0,min:1,supplier:'Costco'},
+    {name:'Press and seal',category:'Supplies',unit:'rolls',qty:0,min:1,supplier:'Costco'},
+    {name:'Aluminum foil',category:'Supplies',unit:'rolls',qty:0,min:1,supplier:'Costco'},
+    {name:'Garbage bags',category:'Supplies',unit:'boxes',qty:0,min:1,supplier:'Costco'},
+    {name:'Lined post-it notes',category:'Office',unit:'packs',qty:0,min:1,supplier:'Costco'},
+    {name:'Envelopes',category:'Office',unit:'boxes',qty:0,min:1,supplier:'Costco'},
+    {name:'Frosted animal crackers',category:'Dry Goods',unit:'bags',qty:0,min:1,supplier:'Meijer'},
+    {name:'Golden Oreos',category:'Dry Goods',unit:'bags',qty:0,min:1,supplier:'Meijer'},
+    {name:'Rice Krispies',category:'Dry Goods',unit:'boxes',qty:0,min:1,supplier:'Meijer'},
+    {name:'Pretzel twists',category:'Dry Goods',unit:'bags',qty:0,min:1,supplier:'Meijer'},
+    {name:'Pretzel rods',category:'Dry Goods',unit:'bags',qty:0,min:1,supplier:'Meijer'},
+    {name:'Kettle chips',category:'Dry Goods',unit:'bags',qty:0,min:1,supplier:'Meijer'},
+    {name:'Coconut flakes',category:'Baking',unit:'bags',qty:0,min:1,supplier:'Meijer'},
+    {name:'Strawberry jello',category:'Baking',unit:'boxes',qty:0,min:1,supplier:'Meijer'},
+    {name:'Mini marshmallows',category:'Baking',unit:'bags',qty:0,min:1,supplier:'Meijer'},
+    {name:'Crushed pineapple',category:'Baking',unit:'cans',qty:0,min:2,supplier:'Meijer'},
+    {name:'Chocolate cake mix',category:'Cake Mixes',unit:'boxes',qty:0,min:5,supplier:'Meijer'},
+    {name:'Red velvet cake mix',category:'Cake Mixes',unit:'boxes',qty:0,min:4,supplier:'Meijer'},
+    {name:'Vanilla cake mix',category:'Cake Mixes',unit:'boxes',qty:0,min:5,supplier:'Meijer'},
+    {name:'White cake mix',category:'Cake Mixes',unit:'boxes',qty:0,min:2,supplier:'Meijer'},
+    {name:'Yellow cake mix',category:'Cake Mixes',unit:'boxes',qty:0,min:2,supplier:'Meijer'},
+    {name:'Strawberry cake mix',category:'Cake Mixes',unit:'boxes',qty:0,min:2,supplier:'Meijer'},
+    {name:'Lemon juice',category:'Produce',unit:'bottles',qty:0,min:1,supplier:'Meijer'},
+    {name:'Blueberries (fresh)',category:'Produce',unit:'pints',qty:0,min:1,supplier:'Meijer'},
+    {name:'Sweetened condensed milk',category:'Baking',unit:'cans',qty:0,min:2,supplier:'Meijer'},
+    {name:'Pumpkin puree',category:'Baking',unit:'cans',qty:0,min:1,supplier:'Meijer'},
+    {name:'Corn syrup',category:'Baking',unit:'bottles',qty:0,min:1,supplier:'Meijer'},
+    {name:'Diet Dr Pepper',category:'Beverages',unit:'cases',qty:0,min:1,supplier:'Meijer'},
+    {name:'Diet Coke',category:'Beverages',unit:'cases',qty:0,min:1,supplier:'Meijer'},
+    {name:'Mountain Dew',category:'Beverages',unit:'cases',qty:0,min:1,supplier:'Meijer'},
+    {name:'Root beer',category:'Beverages',unit:'cases',qty:0,min:1,supplier:'Meijer'},
+    {name:'Cherry Coke',category:'Beverages',unit:'cases',qty:0,min:1,supplier:'Meijer'},
+    {name:'Aluminum foil',category:'Supplies',unit:'rolls',qty:0,min:1,supplier:'Meijer'},
+    {name:'Press and seal',category:'Supplies',unit:'rolls',qty:0,min:1,supplier:'Meijer'},
+    {name:'WD-40',category:'Supplies',unit:'cans',qty:0,min:1,supplier:'Meijer'},
+    {name:'Dry erase markers',category:'Office',unit:'packs',qty:0,min:1,supplier:'Meijer'},
+    {name:'32oz deli containers with lids',category:'Packaging',unit:'sleeves',qty:0,min:1,supplier:'Restaurant Depot'},
+    {name:'Thank you bags',category:'Packaging',unit:'boxes',qty:0,min:1,supplier:'Restaurant Depot'},
+    {name:'Oreo mousse torte',category:'Ready-made',unit:'each',qty:0,min:1,supplier:'Restaurant Depot'},
+    {name:'Chocolate mousse torte',category:'Ready-made',unit:'each',qty:0,min:1,supplier:'Restaurant Depot'},
+    {name:'Macarons',category:'Ready-made',unit:'boxes',qty:0,min:1,supplier:'Restaurant Depot'},
+    {name:'Flourless cake',category:'Ready-made',unit:'each',qty:0,min:1,supplier:'Restaurant Depot'},
+    {name:'Red velvet take and bake',category:'Ready-made',unit:'each',qty:0,min:1,supplier:'Restaurant Depot'},
+    {name:'Chocolate fudge cake',category:'Ready-made',unit:'each',qty:0,min:1,supplier:'Restaurant Depot'},
+    {name:'Cinnamon take and bake',category:'Ready-made',unit:'each',qty:0,min:1,supplier:'Restaurant Depot'},
+    {name:'Graham flour',category:'Dry Goods',unit:'bags',qty:0,min:1,supplier:'Restaurant Depot'},
+    {name:'Butterfinger pieces',category:'Nuts & Mix-ins',unit:'bags',qty:0,min:1,supplier:'Restaurant Depot'},
+    {name:'Vanilla extract',category:'Baking',unit:'bottles',qty:0,min:1,supplier:'Restaurant Depot'},
+    {name:'Nutella',category:'Baking',unit:'jars',qty:0,min:1,supplier:'Restaurant Depot'},
+    {name:'Crisco',category:'Baking',unit:'cans',qty:0,min:1,supplier:'Restaurant Depot'},
+    {name:'Cocoa powder',category:'Baking',unit:'containers',qty:0,min:1,supplier:'Restaurant Depot'},
+    {name:'Molasses',category:'Baking',unit:'bottles',qty:0,min:1,supplier:'Restaurant Depot'},
+    {name:'Biscoff spread',category:'Baking',unit:'jars',qty:0,min:1,supplier:'Restaurant Depot'},
+    {name:'Ghirardelli caramel squeeze bottles',category:'Baking',unit:'bottles',qty:0,min:1,supplier:'Restaurant Depot'},
+    {name:'Ghirardelli chocolate squeeze bottles',category:'Baking',unit:'bottles',qty:0,min:1,supplier:'Restaurant Depot'},
+    {name:'Butter',category:'Dairy',unit:'boxes',qty:0,min:1,supplier:'Restaurant Depot'},
+    {name:'Lemons',category:'Produce',unit:'bags',qty:0,min:1,supplier:'Restaurant Depot'},
+    {name:'Pam / baking spray',category:'Oils & Liquids',unit:'cans',qty:0,min:1,supplier:'Restaurant Depot'},
+    {name:'Large gloves (green box)',category:'Supplies',unit:'boxes',qty:0,min:1,supplier:'Restaurant Depot'},
+    {name:'Sea salt shaker',category:'Spices',unit:'each',qty:0,min:1,supplier:'Restaurant Depot'},
+    {name:'5-cutter pastry wheel',category:'Equipment',unit:'each',qty:0,min:1,supplier:'Restaurant Depot'},
+    {name:'Drink thermometers',category:'Equipment',unit:'each',qty:0,min:1,supplier:'Restaurant Depot'},
+    {name:'Butterscotch chips',category:'Nuts & Mix-ins',unit:'bags',qty:0,min:1,supplier:"Gordon's / Webstaurant"},
+    {name:'Vanilla Monin syrup',category:'Beverages',unit:'bottles',qty:0,min:1,supplier:"Gordon's / Webstaurant"},
+    {name:'Strawberry Monin syrup',category:'Beverages',unit:'bottles',qty:0,min:1,supplier:"Gordon's / Webstaurant"},
+  ];
+  for(const ing of SEED){const {supplier,...rest}=ing;const supplierId=supplierMap[supplier]||'';const id=await fbPush('ingredients',{...rest,supplierId});state.ingredients.push({id,...rest,supplierId});}
+}
+
+function confirmReloadIngredients() {
+  openModal(`<div class="modal-title">Reload ingredients?</div>
+    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:1rem;line-height:1.5">This will <strong>delete all current ingredients</strong> and reload the full master list. Quantities reset to 0.</p>
+    <div class="modal-actions"><button class="btn btn-outline" onclick="closeModalDirect()">Cancel</button><button class="btn btn-danger" onclick="closeModalDirect();doReloadIngredients()">Yes, reload</button></div>`);
+}
+async function doReloadIngredients() {
+  const logEl=document.getElementById('reset-log');
+  if(logEl){logEl.style.display='block';logEl.innerHTML='';}
+  function rlog(msg){if(logEl){const d=document.createElement('div');d.style.padding='2px 0';d.textContent=msg;logEl.appendChild(d);logEl.scrollTop=logEl.scrollHeight;}}
+  await fbSet('ingredients',null); await fbSet('suppliers',null); state.ingredients=[]; state.suppliers=[];
+  rlog('Cleared. Reloading...');
+  await seedIngredientsIfEmpty();
+  rlog('Done! '+state.ingredients.length+' ingredients loaded.');
+}
+
+// ── POLL ──────────────────────────────────────────────────
+function pollData() {
+  setInterval(async () => {
+    try {
+      const all = await sbGetAll();
+      chatMessages = objToArr(all.teamChat).sort((a,b)=>(a.ts||0)-(b.ts||0));
+      deliveryItems = objToArr(all.deliveryList).sort((a,b)=>(a.ts||0)-(b.ts||0));
+      shoppingListItems = objToArr(all.shoppingList).sort((a,b)=>(a.ts||0)-(b.ts||0));
+      updateDeliveryBadge(); updateShoppingBadge();
+      if(document.getElementById('page-chat').classList.contains('active')) renderChat();
+      if(document.getElementById('page-delivery').classList.contains('active')) renderDelivery();
+      if(document.getElementById('page-shopping').classList.contains('active')) renderShopping();
+      if(document.getElementById('page-overview').classList.contains('active')) renderAlerts();
+    } catch(e) {}
+  }, 20000);
+}
+
+// ── HELPERS ───────────────────────────────────────────────
+function buildFilterPills(containerId, cats, active, onClick) {
+  const c=document.getElementById(containerId);
+  if(!c)return;
+  c.innerHTML=cats.map(cat=>`<div class="filter-pill ${active===cat?'active':''}" onclick="(${onClick.toString()})('${cat}',this)">${cat==='all'?'All':cat}</div>`).join('');
+}
+function getWeekStart() {
+  const d=new Date(),day=d.getDay(),diff=d.getDate()-day+(day===0?-6:1),mon=new Date(d.setDate(diff));
+  return mon.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
+</script>
+</body>
+</html>
